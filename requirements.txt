@@ -1,0 +1,10 @@
+openai-whisper==20240930
+streamlit==1.42.2
+authlib==1.5.1
+sounddevice==0.5.1
+numpy==2.0.2
+sumy==0.11.0
+pyannote.audio==3.3.2
+transformers==4.49.0
+accelerate==1.5.2
+openai==1.68.2

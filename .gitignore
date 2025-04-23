@@ -1,0 +1,78 @@
+# Bytecode files
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.env/
+venv/
+env/
+.venv/
+
+# Distribution / packaging
+*.egg-info/
+.dist/
+dist/
+eggs/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# IntelliJ IDEA
+.idea/
+
+# Pytest
+.cache/
+
+# mypy
+.mypy_cache/
+
+# Pylint
+pylint_report/
+
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+
+# Flask
+instance/
+.webassets-cache
+
+# Pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Coverage reports
+.coverage
+.coverage.*
+
+# Sphinx documentation
+docs/_build/
+
+# IDEs
+.idea/
+.vscode/
+
+# Other
+*.bak
+*.swp
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Docker
+*.tar
+
+# Ansible
+.ansible
