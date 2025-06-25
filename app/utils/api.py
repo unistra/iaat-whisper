@@ -1,6 +1,7 @@
 from openai import OpenAI
 from jinja2 import Environment, FileSystemLoader
 import os
+import re
 
 
 def translate_text(base_url: str, authtoken: str, model: str, text: str, language: str = "en") -> str:
@@ -28,7 +29,10 @@ def translate_text(base_url: str, authtoken: str, model: str, text: str, languag
         temperature=0.2,
     )
 
-    return response.choices[0].message.content  # type: ignore
+    # Remove <think> tags from the response content
+    content = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL)   # type: ignore
+
+    return content
 
 
 def format_summary(base_url: str, authtoken: str, model: str, summary: str, language="en") -> str:
@@ -57,4 +61,7 @@ def format_summary(base_url: str, authtoken: str, model: str, summary: str, lang
         temperature=0.4,
     )
 
-    return response.choices[0].message.content  # type: ignore
+    # Remove <think> tags from the response content
+    content = re.sub(r'<think>.*?</think>', '', response.choices[0].message.content, flags=re.DOTALL)   # type: ignore
+
+    return content
