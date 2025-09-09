@@ -1,8 +1,12 @@
 import streamlit as st
 from utils.style import custom_font
 import os
+from utils.log import logger, setup_logger
 from streamlit.runtime.secrets import secrets_singleton
 from utils.secrets import get_secrets
+
+# Setup logger
+setup_logger()
 
 # Secrets management
 secrets_path = ".streamlit/secrets.toml"

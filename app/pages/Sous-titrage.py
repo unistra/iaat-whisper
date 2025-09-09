@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.log import logger, setup_logger
 import whisper
 import tempfile
 import mimetypes
@@ -9,6 +10,9 @@ from utils.style import custom_font
 from streamlit.runtime.secrets import secrets_singleton
 from utils.process import WHISPER_MODEL_OPTIONS, extract_audio_from_video, translate_srt_in_chunks
 import torch
+
+# Setup logger
+setup_logger()
 
 # Gestion des secrets
 secrets_path = ".streamlit/secrets.toml"
@@ -67,6 +71,7 @@ uploaded_video = st.file_uploader("Déposez votre fichier vidéo ici", type=["mp
 
 if uploaded_video is not None:
     if st.button("📝 Générer les sous-titres"):
+        logger.info(f"User '{st.experimental_user.name}' uploaded file '{uploaded_video.name}' for subtitling.")
         file_extension = uploaded_video.name.split(".")[-1]
         mime_type, _ = mimetypes.guess_type(uploaded_video.name)
 
@@ -80,13 +85,16 @@ if uploaded_video is not None:
             extract_audio_from_video(video_path, audio_path)
 
             try:
+                logger.info(f"Starting subtitle generation for file '{video_path}'")
                 st.write("⏳ Analyse en cours... Prenez un café ☕")
                 transcription = transcribe_audio(audio_path, translate=translate_option)
 
                 # Stocker la transcription dans la session
                 st.session_state.subtitle_result = transcription
+                logger.info(f"Successfully generated subtitles for file '{video_path}'")
 
             except Exception as e:
+                logger.error(f"Error during subtitle generation for file '{video_path}': {str(e)}")
                 st.error(f"❌ Une erreur est survenue : {e}")
 
             finally:
@@ -145,6 +153,7 @@ if st.session_state.subtitle_result:
         )
 
         if language_target != "" and language_target != detected_language:
+            logger.info(f"User '{st.experimental_user.name}' is translating subtitles to '{language_target}'.")
             translated_text = translate(
                 st.secrets["llm"]["url"],
                 st.secrets["llm"]["token"],
@@ -166,6 +175,7 @@ if st.session_state.subtitle_result:
             )
 
     except Exception as e:
+        logger.error(f"Error during subtitle file generation or translation: {str(e)}")
         st.error(f"❌ Une erreur est survenue : {e}")
     finally:
         os.remove(srt_path)

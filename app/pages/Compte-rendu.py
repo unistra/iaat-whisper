@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.log import logger, setup_logger
 import whisper
 import tempfile
 import json
@@ -18,6 +19,9 @@ from utils.process import (
 )
 from utils.api import format_summary
 from utils.secrets import get_secrets
+
+# Setup logger
+setup_logger()
 
 download_nltk_resources()
 
@@ -110,6 +114,7 @@ def process_transcription(tmp_filename: str) -> None:
     """
     Process the transcription and diarization of the audio
     """
+    logger.info(f"Starting transcription process for file '{tmp_filename}'")
     resampled_audio = None
     try:
         st.write("⏳ Analyse en cours... Prenez un café ☕")
@@ -128,8 +133,10 @@ def process_transcription(tmp_filename: str) -> None:
 
         st.session_state.transcription_result = transcription
         st.session_state.summary = None
+        logger.info(f"Successfully transcribed file '{tmp_filename}'")
 
     except Exception as e:
+        logger.error(f"Error during transcription/diarization for file '{tmp_filename}': {str(e)}")
         st.error(f"❌ Erreur pendant la transcription/diarisation : {str(e)}")
     finally:
         os.remove(tmp_filename)
@@ -146,11 +153,13 @@ if input_option == "📂 Télécharger un fichier":
             file_extension = uploaded_file.name.split(".")[-1]
             mime_type, _ = mimetypes.guess_type(uploaded_file.name)
             if mime_type and mime_type.startswith("audio"):
+                logger.info(f"User '{st.experimental_user.name}' uploaded file '{uploaded_file.name}' for transcription.")
                 with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
                     tmp_file.write(uploaded_file.read())
                     tmp_filename = tmp_file.name
                 process_transcription(tmp_filename)
             else:
+                logger.warning(f"Uploaded file '{uploaded_file.name}' has unsupported format.")
                 st.error("❌ Format non reconnu ! Merci d'ajouter un fichier audio valide.")
 
 # Microphone input option
@@ -172,6 +181,7 @@ elif input_option == "🎤 Utiliser le micro":
     # Add a button to start the transcription
     if "audio_data" in st.session_state and st.session_state.audio_data:
         if st.button("📝 Transformer l'audio en texte"):
+            logger.info(f"User '{st.experimental_user.name}' is using microphone for transcription.")
             st.session_state.transcription_result = None
             st.session_state.summary = None
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
@@ -229,11 +239,13 @@ if "transcription_result" in st.session_state and st.session_state.transcription
     )
 
     if st.button("✨ Générer une synthèse"):
+        logger.info(f"User '{st.experimental_user.name}' is generating a summary.")
         try:
             st.write("⏳ Analyse en cours... Prenez un café ☕")
             summary = summarize(text_transcription, num_sentences=num_sentences, language=detected_language)
             st.session_state.summary = summary
-        except ValueError as e:
+        except Exception as e:
+            logger.error(f"Error during summarization: {str(e)}")
             st.error(str(e))
 
     if st.session_state.summary:
