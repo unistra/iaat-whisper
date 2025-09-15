@@ -235,7 +235,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         st.session_state.summary = None
 
     num_sentences = st.slider(
-        "Choisissez le nombre de lignes pertinentes à extraire", min_value=5, max_value=100, value=30
+        "Choisissez le nombre de lignes pertinentes à extraire", min_value=5, max_value=300, value=80
     )
 
     if st.button("✨ Générer une synthèse"):
