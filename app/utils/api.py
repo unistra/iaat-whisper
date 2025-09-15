@@ -25,7 +25,7 @@ def translate_text(base_url: str, authtoken: str, model: str, text: str, languag
             {"role": "system", "content": system_prompt.strip()},
             {"role": "user", "content": user_prompt.strip()},
         ],
-        max_tokens=16384,
+        max_tokens=32768,
         temperature=0.2,
     )
 
@@ -57,7 +57,7 @@ def format_summary(base_url: str, authtoken: str, model: str, summary: str, lang
             {"role": "system", "content": system_prompt.strip()},
             {"role": "user", "content": user_prompt.strip()},
         ],
-        max_tokens=16384,
+        max_tokens=32768,
         temperature=0.4,
     )
 
