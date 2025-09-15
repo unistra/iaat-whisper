@@ -14,7 +14,10 @@ def test_get_secrets():
         "LLM_URL": "https://llm.example.com",
         "LLM_TOKEN": "llm_token_value",
         "LLM_MODEL": "llm_model_value",
+        "LLM_MAX_TOKENS": "16384",
+        "LLM_TEMPERATURE": "0.3",
         "USE_CUSTOM_STYLE": "true",
+        "SUMY_LENGTH_DEFAULT": "80",
     }):
         secrets = get_secrets()
 
@@ -28,4 +31,7 @@ def test_get_secrets():
         assert secrets["llm"]["url"] == "https://llm.example.com"
         assert secrets["llm"]["token"] == "llm_token_value"
         assert secrets["llm"]["model"] == "llm_model_value"
+        assert secrets["llm"]["max_tokens"] == 16384
+        assert secrets["llm"]["temperature"] == 0.3
         assert secrets["app"]["use_custom_style"] is True
+        assert secrets["app"]["sumy_length_default"] == 80

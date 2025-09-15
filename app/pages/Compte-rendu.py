@@ -86,6 +86,8 @@ def summarize(text: str, num_sentences: int, language: str) -> str:
         st.secrets["llm"]["url"],
         st.secrets["llm"]["token"],
         st.secrets["llm"]["model"],
+        st.secrets["llm"]["max_tokens"],
+        st.secrets["llm"]["temperature"],
         summarize,
         language=language,
     )
@@ -235,7 +237,10 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         st.session_state.summary = None
 
     num_sentences = st.slider(
-        "Choisissez le nombre de lignes pertinentes à extraire", min_value=5, max_value=120, value=60
+        "Choisissez le nombre de lignes pertinentes à extraire",
+        min_value=5,
+        max_value=300,
+        value=st.secrets["app"].get("sumy_length_default", 80),
     )
 
     if st.button("✨ Générer une synthèse"):

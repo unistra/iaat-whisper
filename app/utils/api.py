@@ -4,7 +4,7 @@ import os
 import re
 
 
-def translate_text(base_url: str, authtoken: str, model: str, text: str, language: str = "en") -> str:
+def translate_text(base_url: str, authtoken: str, model: str, max_tokens: int,text: str, language: str = "en") -> str:
     """
     Translates a text into the specified language using a VLLM model.
     """
@@ -25,8 +25,8 @@ def translate_text(base_url: str, authtoken: str, model: str, text: str, languag
             {"role": "system", "content": system_prompt.strip()},
             {"role": "user", "content": user_prompt.strip()},
         ],
-        max_tokens=32768,
-        temperature=0.2,
+        max_tokens=max_tokens,
+        temperature=0,
     )
 
     # Remove <think> tags from the response content
@@ -35,7 +35,7 @@ def translate_text(base_url: str, authtoken: str, model: str, text: str, languag
     return content
 
 
-def format_summary(base_url: str, authtoken: str, model: str, summary: str, language="en") -> str:
+def format_summary(base_url: str, authtoken: str, model: str, max_tokens: int, temperature: float, summary: str, language="en") -> str:
     """
     Reformats a summary into a structured meeting report using a VLLM instance.
     The prompt is in English, but the output is generated in the specified language.
@@ -57,8 +57,8 @@ def format_summary(base_url: str, authtoken: str, model: str, summary: str, lang
             {"role": "system", "content": system_prompt.strip()},
             {"role": "user", "content": user_prompt.strip()},
         ],
-        max_tokens=32768,
-        temperature=0.4,
+        max_tokens=max_tokens,
+        temperature=temperature,
     )
 
     # Remove <think> tags from the response content
