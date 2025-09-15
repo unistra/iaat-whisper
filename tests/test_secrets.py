@@ -15,6 +15,7 @@ def test_get_secrets():
         "LLM_TOKEN": "llm_token_value",
         "LLM_MODEL": "llm_model_value",
         "USE_CUSTOM_STYLE": "true",
+        "SUMY_LENGTH_DEFAULT": "80",
     }):
         secrets = get_secrets()
 
@@ -29,3 +30,4 @@ def test_get_secrets():
         assert secrets["llm"]["token"] == "llm_token_value"
         assert secrets["llm"]["model"] == "llm_model_value"
         assert secrets["app"]["use_custom_style"] is True
+        assert secrets["app"]["sumy_length_default"] == 80

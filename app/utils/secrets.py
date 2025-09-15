@@ -22,5 +22,6 @@ def get_secrets():
         },
         "app": {
             "use_custom_style": os.getenv("USE_CUSTOM_STYLE", "false").lower() == "true",
+            "sumy_length_default": int(os.getenv("SUMY_LENGTH_DEFAULT", "80")),
         }
     }

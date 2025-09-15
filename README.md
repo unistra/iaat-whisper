@@ -53,6 +53,7 @@ les traduire en plusieurs langues.
 
   [app]
   use_custom_style = false
+  sumy_length_default = 80
   ```
 - Si vous souhaitez utiliser la police UnistraA (`use_custom_style = true`), vous devez télécharger les fichiers de police UnistraA (`UnistraA-Regular.ttf`, `UnistraA-Bold.ttf`, etc.) et les placer dans le dossier `app/static/fonts` du projet (ex: `app/static/fonts/UnistraA-Regular.ttf`).
 - Lancer les tests unitaires via:
@@ -81,6 +82,7 @@ les traduire en plusieurs langues.
     -e LLM_TOKEN="your-llm-token" \
     -e LLM_MODEL="your-llm-model" \
     -e USE_CUSTOM_STYLE="false" \
+    -e SUMY_LENGTH_DEFAULT="80" \
     whisper-app
   ```
 
