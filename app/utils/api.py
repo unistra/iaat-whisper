@@ -26,7 +26,7 @@ def translate_text(base_url: str, authtoken: str, model: str, max_tokens: int,te
             {"role": "user", "content": user_prompt.strip()},
         ],
         max_tokens=max_tokens,
-        temperature=0.2,
+        temperature=0,
     )
 
     # Remove <think> tags from the response content
