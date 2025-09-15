@@ -34,17 +34,13 @@ st.markdown(f"👋 Bonjour {st.experimental_user.name}, prêt à générer des s
 
 st.title("Sous-titrage de vidéos")
 
-# Sélection du modèle
-selected_model = st.selectbox("Choisissez la précision de l'analyse :", WHISPER_MODEL_OPTIONS, index=1)
-
-
 @st.cache_resource
 def load_whisper_model(model_name: str) -> whisper.Whisper:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     return whisper.load_model(model_name, device=device)
 
 
-model = load_whisper_model(selected_model)
+model = load_whisper_model(st.secrets["app"].get("whisper_model", "turbo"))
 
 translate_option = st.checkbox("🌎 Traduire directement en anglais")
 

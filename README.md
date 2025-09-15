@@ -50,10 +50,13 @@ les traduire en plusieurs langues.
   url="http://my-vllm:8000/v1"
   token="s3cre3t"
   model="mistralai/Mistral-7B-Instruct-v0.3"
+  max_tokens=32768
+  temperature=0.4
 
   [app]
   use_custom_style = false
   sumy_length_default = 80
+  whisper_model = "turbo"
   ```
 - Si vous souhaitez utiliser la police UnistraA (`use_custom_style = true`), vous devez télécharger les fichiers de police UnistraA (`UnistraA-Regular.ttf`, `UnistraA-Bold.ttf`, etc.) et les placer dans le dossier `app/static/fonts` du projet (ex: `app/static/fonts/UnistraA-Regular.ttf`).
 - Lancer les tests unitaires via:
@@ -85,6 +88,7 @@ les traduire en plusieurs langues.
     -e LLM_TEMPERATURE="0.4" \
     -e USE_CUSTOM_STYLE="false" \
     -e SUMY_LENGTH_DEFAULT="80" \
+    -e WHISPER_MODEL = "turbo"
     whisper-app
   ```
 

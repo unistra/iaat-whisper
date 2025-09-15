@@ -18,6 +18,7 @@ def test_get_secrets():
         "LLM_TEMPERATURE": "0.3",
         "USE_CUSTOM_STYLE": "true",
         "SUMY_LENGTH_DEFAULT": "80",
+        "WHISPER_MODEL": "turbo"
     }):
         secrets = get_secrets()
 
@@ -35,3 +36,4 @@ def test_get_secrets():
         assert secrets["llm"]["temperature"] == 0.3
         assert secrets["app"]["use_custom_style"] is True
         assert secrets["app"]["sumy_length_default"] == 80
+        assert secrets["app"]["whisper_model"] == "turbo"
