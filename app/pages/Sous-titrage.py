@@ -58,8 +58,8 @@ def transcribe_audio(file_path: str, translate: bool = False) -> dict:
 
 
 @st.cache_data
-def translate(base_url: str, authtoken: str, model: str, srt_text: str, language: str = "en") -> str:
-    return translate_srt_in_chunks(base_url, authtoken, model, srt_text, language, 20000)
+def translate(base_url: str, authtoken: str, model: str, max_tokens, srt_text: str, language: str = "en") -> str:
+    return translate_srt_in_chunks(base_url, authtoken, model, max_tokens, srt_text, language, 20000)
 
 
 # Gestion de l'état de la session
@@ -158,6 +158,7 @@ if st.session_state.subtitle_result:
                 st.secrets["llm"]["url"],
                 st.secrets["llm"]["token"],
                 st.secrets["llm"]["model"],
+                st.secrets["llm"]["max_tokens"],
                 srt_content,
                 language_labels[language_target],
             )

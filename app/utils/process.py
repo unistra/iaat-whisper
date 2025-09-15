@@ -151,7 +151,7 @@ def split_srt(srt_text: str, max_chars: int) -> list[str]:
 
 
 def translate_srt_in_chunks(
-    base_url: str, authtoken: str, model: str, srt_text: str, language: str = "en", max_chars: int = 500
+    base_url: str, authtoken: str, model: str, max_tokens: int, srt_text: str, language: str = "en", max_chars: int = 500
 ) -> str:
     """
     Translate an SRT file in chunks to avoid a too long prompt.
@@ -160,7 +160,7 @@ def translate_srt_in_chunks(
     translated_chunks = []
 
     for chunk in chunks:
-        translated_chunk = translate_text(base_url, authtoken, model, chunk, language)
+        translated_chunk = translate_text(base_url, authtoken, model, max_tokens, chunk, language)
         translated_chunks.append(translated_chunk)
 
     return "\n\n".join(translated_chunks)

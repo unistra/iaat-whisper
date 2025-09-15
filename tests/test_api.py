@@ -30,6 +30,7 @@ Je vais très bien !
             base_url="http://example.com",
             authtoken="fake_token",
             model="fake_model",
+            max_tokens=1024,
             text=input_text,
             language="fr"
         )
@@ -75,6 +76,7 @@ John mettra à jour le calendrier.
             base_url="http://example.com",
             authtoken="fake_token",
             model="fake_model",
+            max_tokens=1024,
             summary=input_summary,
             language="fr"
         )

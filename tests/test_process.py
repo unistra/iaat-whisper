@@ -186,9 +186,9 @@ Très bien, merci !"""
     ]
 
     with patch("utils.process.translate_text") as mock_translate_text:
-        mock_translate_text.side_effect = lambda base_url, authtoken, model, text, language: f"Translated: {text}"
+        mock_translate_text.side_effect = lambda base_url, authtoken, model, max_tokens, text, language: f"Translated: {text}"
 
-        translate_srt_in_chunks("http://example.com", "dummy_token", "mistral", srt_text, "en", 50)
+        translate_srt_in_chunks("http://example.com", "dummy_token", "mistral", 1024, srt_text, "en", 50)
 
         for chunk in expected_chunks:
-            mock_translate_text.assert_any_call("http://example.com", "dummy_token", "mistral", chunk, "en")
+            mock_translate_text.assert_any_call("http://example.com", "dummy_token", "mistral", 1024, chunk, "en")
