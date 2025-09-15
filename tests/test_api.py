@@ -77,6 +77,7 @@ John mettra à jour le calendrier.
             authtoken="fake_token",
             model="fake_model",
             max_tokens=1024,
+            temperature=0.4,
             summary=input_summary,
             language="fr"
         )

@@ -20,6 +20,7 @@ def get_secrets():
             "token": os.getenv("LLM_TOKEN"),
             "model": os.getenv("LLM_MODEL"),
             "max_tokens": int(os.getenv("LLM_MAX_TOKENS", "32768")),
+            "temperature": float(os.getenv("LLM_TEMPERATURE", "0.4")),
         },
         "app": {
             "use_custom_style": os.getenv("USE_CUSTOM_STYLE", "false").lower() == "true",

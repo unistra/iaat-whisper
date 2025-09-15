@@ -87,6 +87,7 @@ def summarize(text: str, num_sentences: int, language: str) -> str:
         st.secrets["llm"]["token"],
         st.secrets["llm"]["model"],
         st.secrets["llm"]["max_tokens"],
+        st.secrets["llm"]["temperature"],
         summarize,
         language=language,
     )

@@ -35,7 +35,7 @@ def translate_text(base_url: str, authtoken: str, model: str, max_tokens: int,te
     return content
 
 
-def format_summary(base_url: str, authtoken: str, model: str, max_tokens: int, summary: str, language="en") -> str:
+def format_summary(base_url: str, authtoken: str, model: str, max_tokens: int, temperature: float, summary: str, language="en") -> str:
     """
     Reformats a summary into a structured meeting report using a VLLM instance.
     The prompt is in English, but the output is generated in the specified language.
@@ -58,7 +58,7 @@ def format_summary(base_url: str, authtoken: str, model: str, max_tokens: int, s
             {"role": "user", "content": user_prompt.strip()},
         ],
         max_tokens=max_tokens,
-        temperature=0.4,
+        temperature=temperature,
     )
 
     # Remove <think> tags from the response content

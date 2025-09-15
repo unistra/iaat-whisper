@@ -82,6 +82,7 @@ les traduire en plusieurs langues.
     -e LLM_TOKEN="your-llm-token" \
     -e LLM_MODEL="your-llm-model" \
     -e LLM_MAX_TOKENS="32768" \
+    -e LLM_TEMPERATURE="0.4" \
     -e USE_CUSTOM_STYLE="false" \
     -e SUMY_LENGTH_DEFAULT="80" \
     whisper-app
