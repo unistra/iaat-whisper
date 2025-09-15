@@ -46,7 +46,6 @@ st.markdown(f"👋 Bonjour {st.experimental_user.name}, prêt à transformer vos
 
 st.title("Compte-rendu de réunion")
 
-selected_model = st.selectbox("Choisissez la précision de l'analyse :", WHISPER_MODEL_OPTIONS, index=1)
 diarization_enabled = st.checkbox("🔍 Identifier les différents intervenants", value=False)
 
 
@@ -65,7 +64,7 @@ def load_diarization_model() -> Pipeline:
     return pipeline
 
 
-model = load_whisper_model(selected_model)
+model = load_whisper_model(st.secrets["app"].get("whisper_model", "turbo"))
 diarization_model = load_diarization_model() if diarization_enabled else None
 
 
