@@ -17,7 +17,7 @@ from utils.process import (
     summarize_text,
     assign_speakers,
 )
-from utils.api import format_summary
+from utils.api import format_summary, transcribe_audio_via_api
 from utils.secrets import get_secrets
 
 # Setup logger
@@ -50,9 +50,11 @@ diarization_enabled = st.checkbox("🔍 Identifier les différents intervenants"
 
 
 @st.cache_resource
-def load_whisper_model(model_name: str) -> whisper.Whisper:
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    return whisper.load_model(model_name, device=device)
+def load_whisper_model(model_name: str) -> whisper.Whisper | None:
+    if st.secrets["app"].get("transcription_mode", "local") == "local":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        return whisper.load_model(model_name, device=device)
+    return None
 
 
 @st.cache_resource
@@ -70,7 +72,17 @@ diarization_model = load_diarization_model() if diarization_enabled else None
 
 @st.cache_data
 def transcribe_audio(file_path: str) -> dict:
-    return model.transcribe(file_path, language=None)
+    if st.secrets["app"].get("transcription_mode", "local") == "api":
+        return transcribe_audio_via_api(
+            st.secrets["llm"]["url"],
+            st.secrets["llm"]["token"],
+            st.secrets["app"].get("whisper_model", "turbo"),
+            file_path,
+        )
+    elif model is not None:
+        return model.transcribe(file_path, language=None)
+    else:
+        raise ValueError("Transcription mode is 'local' but the model could not be loaded.")
 
 
 @st.cache_data
