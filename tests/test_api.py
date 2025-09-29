@@ -1,5 +1,6 @@
+from unittest import mock
 from unittest.mock import Mock, patch
-from utils.api import translate_text, format_summary # type: ignore
+from utils.api import translate_text, format_summary, transcribe_audio_via_api # type: ignore
 
 def test_translate_text_success():
     input_text = """1
@@ -89,3 +90,39 @@ John mettra à jour le calendrier.
     assert call_args[1]["model"] == "fake_model"
     assert "You are a professional report writer." in call_args[1]["messages"][0]["content"]
     assert "FR" in call_args[1]["messages"][0]["content"] or "fr" in call_args[1]["messages"][1]["content"].lower()
+
+
+def test_transcribe_audio_via_api_success():
+    expected_output = {
+        "text": "Hello, how are you?",
+        "segments": [
+            {
+                "id": 1,
+                "start": 0.0,
+                "end": 3.0,
+                "text": "Hello, how are you?",
+            }
+        ],
+        "language": "en",
+    }
+
+    mock_client = Mock()
+    mock_response = Mock()
+    mock_response.model_dump.return_value = expected_output
+    mock_client.audio.transcriptions.create.return_value = mock_response
+
+    with patch('utils.api.OpenAI', return_value=mock_client):
+        with patch('builtins.open', mock.mock_open(read_data=b'test_audio_data')) as mock_file:
+            result = transcribe_audio_via_api(
+                base_url="http://example.com",
+                authtoken="fake_token",
+                model="fake_model",
+                file_path="fake_path.wav",
+            )
+
+    assert result == expected_output
+    mock_client.audio.transcriptions.create.assert_called_once()
+    call_args = mock_client.audio.transcriptions.create.call_args
+    assert call_args[1]["model"] == "fake_model"
+    assert call_args[1]["response_format"] == "verbose_json"
+    assert call_args[1]["timestamp_granularities"] == ["segment", "word"]

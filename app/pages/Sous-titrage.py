@@ -9,6 +9,7 @@ from utils.secrets import get_secrets
 from utils.style import custom_font
 from streamlit.runtime.secrets import secrets_singleton
 from utils.process import WHISPER_MODEL_OPTIONS, extract_audio_from_video, translate_srt_in_chunks
+from utils.api import transcribe_audio_via_api
 import torch
 
 # Setup logger
@@ -35,22 +36,30 @@ st.markdown(f"👋 Bonjour {st.experimental_user.name}, prêt à générer des s
 st.title("Sous-titrage de vidéos")
 
 @st.cache_resource
-def load_whisper_model(model_name: str) -> whisper.Whisper:
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    return whisper.load_model(model_name, device=device)
+def load_whisper_model(model_name: str) -> whisper.Whisper | None:
+    if st.secrets["app"].get("transcription_mode", "local") == "local":
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        return whisper.load_model(model_name, device=device)
+    return None
 
 
 model = load_whisper_model(st.secrets["app"].get("whisper_model", "turbo"))
 
-translate_option = st.checkbox("🌎 Traduire directement en anglais")
-
 
 @st.cache_data
-def transcribe_audio(file_path: str, translate: bool = False) -> dict:
-    task = "translate" if translate else "transcribe"
-    language = "en" if translate else None
-    word_timestamps = True if translate else False
-    return model.transcribe(file_path, language=language, task=task, word_timestamps=word_timestamps)
+def transcribe_audio(file_path: str) -> dict:
+    if st.secrets["app"].get("transcription_mode", "local") == "api":
+        return transcribe_audio_via_api(
+            st.secrets["llm"]["url"],
+            st.secrets["llm"]["token"],
+            st.secrets["app"].get("whisper_model", "turbo"),
+            file_path,
+            timestamp_granularities=["segment", "word"],
+        )
+    elif model is not None:
+        return model.transcribe(file_path, language=None)
+    else:
+        raise ValueError("Transcription mode is 'local' but the model could not be loaded.")
 
 
 @st.cache_data
@@ -83,7 +92,7 @@ if uploaded_video is not None:
             try:
                 logger.info(f"Starting subtitle generation for file '{video_path}'")
                 st.write("⏳ Analyse en cours... Prenez un café ☕")
-                transcription = transcribe_audio(audio_path, translate=translate_option)
+                transcription = transcribe_audio(audio_path)
 
                 # Stocker la transcription dans la session
                 st.session_state.subtitle_result = transcription
@@ -100,7 +109,7 @@ if uploaded_video is not None:
 # Affichage des résultats
 if st.session_state.subtitle_result:
     result = st.session_state.subtitle_result
-    detected_language = result["language"]
+    detected_language = result.get("language", "fr")
     st.write(f"🌍 Langue détectée : **{detected_language}**")
 
     # Génération des fichiers SRT et VTT
@@ -108,18 +117,12 @@ if st.session_state.subtitle_result:
     vtt_path = tempfile.mktemp(suffix=".vtt")
     try:
         writer_srt = get_writer("srt", os.path.dirname(srt_path))
-        writer_srt(
-            result,
-            os.path.basename(srt_path),  # type: ignore
-            {"max_line_width": 50, "max_line_count": 1, "highlight_words": False},
-        )
+        with open(srt_path, "w", encoding="utf-8") as f:
+            writer_srt.write_result(result, file=f)
 
         writer_vtt = get_writer("vtt", os.path.dirname(vtt_path))
-        writer_vtt(
-            result,
-            os.path.basename(vtt_path),  # type: ignore
-            {"max_line_width": 50, "max_line_count": 1, "highlight_words": False},
-        )
+        with open(vtt_path, "w", encoding="utf-8") as f:
+            writer_vtt.write_result(result, file=f)
 
         with open(srt_path, "r") as f:
             srt_content = f.read()
@@ -174,6 +177,9 @@ if st.session_state.subtitle_result:
     except Exception as e:
         logger.error(f"Error during subtitle file generation or translation: {str(e)}")
         st.error(f"❌ Une erreur est survenue : {e}")
+        raise e
     finally:
-        os.remove(srt_path)
-        os.remove(vtt_path)
+        if 'srt_path' in locals() and os.path.exists(srt_path):
+            os.remove(srt_path)
+        if 'vtt_path' in locals() and os.path.exists(vtt_path):
+            os.remove(vtt_path)
