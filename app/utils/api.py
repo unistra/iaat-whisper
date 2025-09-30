@@ -88,6 +88,7 @@ def transcribe_audio_via_api(
             file=audio_file,
             response_format="verbose_json",
             timestamp_granularities=timestamp_granularities,
+            timeout=3600,  # 1 hour timeout
         )
 
     # The API returns a pydantic model, we need to convert it to a dict
