@@ -251,6 +251,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         "Résumé de présentation": "presentation_summary_prompt.j2",
         "Synthèse de discussion": "discussion_summary_prompt.j2",
         "Prise de note rapide": "brainstorming_summary_prompt.j2",
+        "Interview (Q&A)": "interview_summary_prompt.j2",
     }
 
     prompt_choice = st.selectbox(
