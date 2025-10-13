@@ -272,9 +272,14 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         logger.info(f"User '{st.experimental_user.name}' is generating a summary.")
         try:
             st.write("⏳ Analyse en cours... Prenez un café ☕")
+
+            text_to_summarize = text_transcription
+            if diarization_enabled:
+                text_to_summarize = transcript_with_speakers
+
             selected_template = PROMPT_CHOICES[prompt_choice]
             summary = summarize(
-                text_transcription,
+                text_to_summarize,
                 num_sentences=num_sentences,
                 language=detected_language,
                 prompt_template=selected_template,
