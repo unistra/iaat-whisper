@@ -29,15 +29,28 @@ def custom_font() -> str:
         font-style: italic;
     }
 
+    /* Appliquer la police partout sauf sur les icônes */
     html, body, h1, code, [class*="st-"] {
         font-family: 'UnistraA', sans-serif !important;
+    }
+
+    [data-testid="stIconMaterial"] {
+        font-family: 'Material Symbols Rounded' !important;
+        font-style: normal !important;
+        font-weight: normal !important;
+        speak: none !important;
+        display: inline-block !important;
+        white-space: nowrap !important;
+        direction: ltr !important;
+        -webkit-font-feature-settings: 'liga' !important;
+        -webkit-font-smoothing: antialiased !important;
     }
 
     .block-container {
         padding-top: 3.75rem;
     }
 
-    html {
+    html, span[label] {
         font-size: 18px !important;
     }
 
