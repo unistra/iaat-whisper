@@ -37,12 +37,12 @@ if st.secrets["app"]["use_custom_style"]:
 st.logo("./app/static/logo.png", size="large")
 
 # CAS authentication
-if not st.experimental_user.is_logged_in:
+if not st.user.is_logged_in:
     st.button("🔑 Se connecter avec votre compte universitaire", on_click=st.login)
     st.stop()
 
 st.button("🚪 Se déconnecter", on_click=st.logout)
-st.markdown(f"👋 Bonjour {st.experimental_user.name}, prêt à transformer vos discussions en compte-rendu ?")
+st.markdown(f"👋 Bonjour {st.user.name}, prêt à transformer vos discussions en compte-rendu ?")
 
 st.title("Compte-rendu de réunion")
 
@@ -167,7 +167,7 @@ if input_option == "📂 Télécharger un fichier":
             file_extension = uploaded_file.name.split(".")[-1]
             mime_type, _ = mimetypes.guess_type(uploaded_file.name)
             if mime_type and mime_type.startswith("audio"):
-                logger.info(f"User '{st.experimental_user.name}' uploaded file '{uploaded_file.name}' for transcription.")
+                logger.info(f"User '{st.user.name}' uploaded file '{uploaded_file.name}' for transcription.")
                 with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
                     tmp_file.write(uploaded_file.read())
                     tmp_filename = tmp_file.name
@@ -195,7 +195,7 @@ elif input_option == "🎤 Utiliser le micro":
     # Add a button to start the transcription
     if "audio_data" in st.session_state and st.session_state.audio_data:
         if st.button("📝 Transformer l'audio en texte"):
-            logger.info(f"User '{st.experimental_user.name}' is using microphone for transcription.")
+            logger.info(f"User '{st.user.name}' is using microphone for transcription.")
             st.session_state.transcription_result = None
             st.session_state.summary = None
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
@@ -270,7 +270,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
     )
 
     if st.button("✨ Générer une synthèse"):
-        logger.info(f"User '{st.experimental_user.name}' is generating a summary.")
+        logger.info(f"User '{st.user.name}' is generating a summary.")
         try:
             st.write("⏳ Analyse en cours... Prenez un café ☕")
 

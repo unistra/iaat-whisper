@@ -19,11 +19,11 @@ if st.secrets["app"]["use_custom_style"]:
 st.logo("./app/static/logo.png", size='large')
 
 # CAS authentication
-if not st.experimental_user.is_logged_in:
+if not st.user.is_logged_in:
     st.button("🔑 Se connecter avec votre compte universitaire", on_click=st.login)
 else :
     st.button("🚪 Se déconnecter", on_click=st.logout)
-    st.markdown(f"👋 Bonjour {st.experimental_user.name}, prêt à utiliser l'IA de transcription ?")
+    st.markdown(f"👋 Bonjour {st.user.name}, prêt à utiliser l'IA de transcription ?")
 
 st.title("IA de Transcription et Sous-Titrage")
 st.write("Bienvenue dans votre assistant intelligent pour transformer l'audio en texte et générer des sous-titres de vidéos.")

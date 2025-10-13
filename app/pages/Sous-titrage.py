@@ -26,12 +26,12 @@ if st.secrets["app"]["use_custom_style"]:
 st.logo("./app/static/logo.png", size="large")
 
 # Authentification CAS
-if not st.experimental_user.is_logged_in:
+if not st.user.is_logged_in:
     st.button("🔑 Se connecter avec votre compte universitaire", on_click=st.login)
     st.stop()
 
 st.button("🚪 Se déconnecter", on_click=st.logout)
-st.markdown(f"👋 Bonjour {st.experimental_user.name}, prêt à générer des sous-titres ?")
+st.markdown(f"👋 Bonjour {st.user.name}, prêt à générer des sous-titres ?")
 
 st.title("Sous-titrage de vidéos")
 
@@ -76,7 +76,7 @@ uploaded_video = st.file_uploader("Déposez votre fichier vidéo ici", type=["mp
 
 if uploaded_video is not None:
     if st.button("📝 Générer les sous-titres"):
-        logger.info(f"User '{st.experimental_user.name}' uploaded file '{uploaded_video.name}' for subtitling.")
+        logger.info(f"User '{st.user.name}' uploaded file '{uploaded_video.name}' for subtitling.")
         file_extension = uploaded_video.name.split(".")[-1]
         mime_type, _ = mimetypes.guess_type(uploaded_video.name)
 
@@ -152,7 +152,7 @@ if st.session_state.subtitle_result:
         )
 
         if language_target != "" and language_target != detected_language:
-            logger.info(f"User '{st.experimental_user.name}' is translating subtitles to '{language_target}'.")
+            logger.info(f"User '{st.user.name}' is translating subtitles to '{language_target}'.")
             translated_text = translate(
                 st.secrets["llm"]["url"],
                 st.secrets["llm"]["token"],
