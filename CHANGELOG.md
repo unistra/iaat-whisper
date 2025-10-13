@@ -1,0 +1,32 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.0.2] - 2025-10-13
+
+### Changed
+- The summarization process now uses the speaker-annotated transcript when diarization is enabled, improving accuracy.
+
+## [1.0.1] - 2025-10-13
+
+### Added
+- **Multiple Summary Formats**: Users can now choose from different types of summaries:
+    - Meeting Report
+    - Presentation Summary
+    - Discussion Summary
+    - Brainstorming / Quick Notes
+- New prompt templates for each summary type.
+
+### Changed
+- The summarization prompts have been significantly improved to provide more distinct and higher-quality results for each use case.
+- The model for transcription can now be sourced from LiteLLM.
+- The user-facing model selection was removed to simplify the interface.
+- Several technical parameters for the LLM (temperature, max tokens) and summarizer (default length) have been exposed or adjusted.
+
+## [1.0.0] - 2025-10-13
+
+- Initial release of the IAAT-Whisper application.
+- Core features include audio transcription (local or API), speaker diarization, summary generation, and subtitle generation.
