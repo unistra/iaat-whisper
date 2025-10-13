@@ -37,10 +37,17 @@ def translate_text(base_url: str, authtoken: str, model: str, max_tokens: int, t
 
 
 def format_summary(
-    base_url: str, authtoken: str, model: str, max_tokens: int, temperature: float, summary: str, language="en"
+    base_url: str,
+    authtoken: str,
+    model: str,
+    max_tokens: int,
+    temperature: float,
+    summary: str,
+    language: str = "en",
+    prompt_template: str = "meeting_report_prompt.j2",
 ) -> str:
     """
-    Reformats a summary into a structured meeting report using a VLLM instance.
+    Reformats a summary into a structured report using a VLLM instance.
     The prompt is in English, but the output is generated in the specified language.
     """
     client = OpenAI(api_key=authtoken, base_url=base_url)
@@ -48,7 +55,7 @@ def format_summary(
     # Jinja2 environment for templates (chemin relatif, compatible déploiement)
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
     env = Environment(loader=FileSystemLoader(templates_dir))
-    system_template = env.get_template("summary_system_prompt.j2")
+    system_template = env.get_template(prompt_template)
     user_template = env.get_template("summary_user_prompt.j2")
 
     system_prompt = system_template.render(language=language)

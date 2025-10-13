@@ -105,6 +105,7 @@ les traduire en plusieurs langues.
 - Support des fichiers audio (mp3, wav, m4a)
 - Identification des intervenants (diarisation)
 - Génération de synthèse automatique
+- Choix du type de synthèse (compte-rendu de réunion, résumé de présentation, etc.)
 - Téléchargement de la transcription et de la synthèse
 
 ### Sous-titrage de Vidéos

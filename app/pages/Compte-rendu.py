@@ -91,7 +91,7 @@ def diarize_audio(file_path: str) -> Any:
 
 
 @st.cache_data
-def summarize(text: str, num_sentences: int, language: str) -> str:
+def summarize(text: str, num_sentences: int, language: str, prompt_template: str) -> str:
     summarize = summarize_text(text, num_sentences=num_sentences, language=language)
     format = format_summary(
         st.secrets["llm"]["url"],
@@ -101,6 +101,7 @@ def summarize(text: str, num_sentences: int, language: str) -> str:
         st.secrets["llm"]["temperature"],
         summarize,
         language=language,
+        prompt_template=prompt_template,
     )
     return format
 
@@ -244,6 +245,18 @@ if "transcription_result" in st.session_state and st.session_state.transcription
     # Generate a summary of the transcription
     st.subheader("Synthèse du compte-rendu")
 
+    # Define prompt choices
+    PROMPT_CHOICES = {
+        "Compte-rendu de réunion": "meeting_report_prompt.j2",
+        "Résumé de présentation": "presentation_summary_prompt.j2",
+        "Synthèse de discussion": "discussion_summary_prompt.j2",
+    }
+
+    prompt_choice = st.selectbox(
+        "Choisissez le type de synthèse :",
+        options=list(PROMPT_CHOICES.keys()),
+    )
+
     if "summary" not in st.session_state:
         st.session_state.summary = None
 
@@ -258,7 +271,13 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         logger.info(f"User '{st.experimental_user.name}' is generating a summary.")
         try:
             st.write("⏳ Analyse en cours... Prenez un café ☕")
-            summary = summarize(text_transcription, num_sentences=num_sentences, language=detected_language)
+            selected_template = PROMPT_CHOICES[prompt_choice]
+            summary = summarize(
+                text_transcription,
+                num_sentences=num_sentences,
+                language=detected_language,
+                prompt_template=selected_template,
+            )
             st.session_state.summary = summary
         except Exception as e:
             logger.error(f"Error during summarization: {str(e)}")
