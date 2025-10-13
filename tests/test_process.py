@@ -3,7 +3,6 @@ from utils.process import (  # type: ignore
     download_nltk_resources,
     summarize_text,
     convert_and_resample_audio,
-    WHISPER_MODEL_OPTIONS,
     assign_speakers,
     extract_audio_from_video,
     split_srt,
@@ -65,11 +64,6 @@ def test_convert_and_resample_audio(sample_audio, tmp_path):
     assert sr == 16000  # 16 kHz
     assert waveform.shape[0] == 1  # Mono
     assert waveform.numel() > 0  # Non empty file
-
-
-def test_whisper_model_options():
-    expected_models = ["base", "turbo"]
-    assert WHISPER_MODEL_OPTIONS == expected_models
 
 
 class FakeTurn:

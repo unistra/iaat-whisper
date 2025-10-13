@@ -11,9 +11,6 @@ import subprocess
 import re
 from utils.api import translate_text
 
-# Whisper available models
-WHISPER_MODEL_OPTIONS = ["base", "turbo"]
-
 
 def download_nltk_resources() -> None:
     """

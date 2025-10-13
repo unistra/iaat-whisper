@@ -1,17 +1,13 @@
 import streamlit as st
 from utils.log import logger, setup_logger
-import whisper
 import tempfile
 import json
 import os
 import mimetypes
 from streamlit.runtime.secrets import secrets_singleton
-import torch
 from typing import Any
-from pyannote.audio import Pipeline
 from utils.style import custom_font
 from utils.process import (
-    WHISPER_MODEL_OPTIONS,
     download_nltk_resources,
     convert_and_resample_audio,
     summarize_text,
@@ -22,8 +18,6 @@ from utils.secrets import get_secrets
 
 # Setup logger
 setup_logger()
-
-download_nltk_resources()
 
 # Secrets management
 secrets_path = ".streamlit/secrets.toml"
@@ -50,7 +44,9 @@ diarization_enabled = st.checkbox("🔍 Identifier les différents intervenants"
 
 
 @st.cache_resource
-def load_whisper_model(model_name: str) -> whisper.Whisper | None:
+def load_whisper_model(model_name: str) -> Any:
+    import torch
+    import whisper
     if st.secrets["app"].get("transcription_mode", "local") == "local":
         device = "cuda" if torch.cuda.is_available() else "cpu"
         return whisper.load_model(model_name, device=device)
@@ -58,7 +54,9 @@ def load_whisper_model(model_name: str) -> whisper.Whisper | None:
 
 
 @st.cache_resource
-def load_diarization_model() -> Pipeline:
+def load_diarization_model() -> Any:
+    import torch
+    from pyannote.audio import Pipeline
     access_token = st.secrets["huggingface"]["token"]
     pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=access_token)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -133,7 +131,7 @@ def process_transcription(tmp_filename: str) -> None:
     try:
         st.write("⏳ Analyse en cours... Prenez un café ☕")
 
-        # Transcription Whisper
+        # Transcription
         transcription = transcribe_audio(tmp_filename)
 
         # Diarisation Pyannote (si activée)
@@ -273,6 +271,8 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         logger.info(f"User '{st.user.name}' is generating a summary.")
         try:
             st.write("⏳ Analyse en cours... Prenez un café ☕")
+
+            download_nltk_resources()
 
             text_to_summarize = text_transcription
             if diarization_enabled:

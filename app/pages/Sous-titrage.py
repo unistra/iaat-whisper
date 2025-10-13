@@ -1,6 +1,5 @@
 import streamlit as st
 from utils.log import logger, setup_logger
-import whisper
 import tempfile
 import mimetypes
 import os
@@ -8,9 +7,9 @@ from whisper.utils import get_writer
 from utils.secrets import get_secrets
 from utils.style import custom_font
 from streamlit.runtime.secrets import secrets_singleton
-from utils.process import WHISPER_MODEL_OPTIONS, extract_audio_from_video, translate_srt_in_chunks
+from utils.process import extract_audio_from_video, translate_srt_in_chunks
 from utils.api import transcribe_audio_via_api
-import torch
+from typing import Any
 
 # Setup logger
 setup_logger()
@@ -36,7 +35,9 @@ st.markdown(f"👋 Bonjour {st.user.name}, prêt à générer des sous-titres ?"
 st.title("Sous-titrage de vidéos")
 
 @st.cache_resource
-def load_whisper_model(model_name: str) -> whisper.Whisper | None:
+def load_whisper_model(model_name: str) -> Any:
+    import torch
+    import whisper
     if st.secrets["app"].get("transcription_mode", "local") == "local":
         device = "cuda" if torch.cuda.is_available() else "cpu"
         return whisper.load_model(model_name, device=device)
