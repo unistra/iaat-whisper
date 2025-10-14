@@ -17,17 +17,13 @@ les traduire en plusieurs langues.
 
 ## Installation pour le développement
 
-- Créer un environnement virtuel :
+- Synchroniser les dépendances du projets avec `uv` :
   ```bash
-  python3.11 -m venv .env
+  uv sync
   ```
 - Activer l'environnement virtuel :
   ```bash
   source .env/bin/activate
-  ```
-- Installer les dépendances :
-  ```bash
-  pip install -r requirements-dev.txt
   ```
 - Créer le fichier de configuration des secrets :
   ```bash
@@ -89,8 +85,8 @@ les traduire en plusieurs langues.
     -e LLM_TEMPERATURE="0.4" \
     -e USE_CUSTOM_STYLE="false" \
     -e SUMY_LENGTH_DEFAULT="80" \
-    -e WHISPER_MODEL = "turbo"\
-    -e TRANSCRIPTION_MODE = "local" \
+    -e WHISPER_MODEL="turbo"\
+    -e TRANSCRIPTION_MODE="local" \
     whisper-app
   ```
 
