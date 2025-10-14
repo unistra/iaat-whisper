@@ -1,6 +1,6 @@
 [project]
 name = "iaat-whisper"
-version = "1.0.3"
+version = "1.0.4"
 description = "Ce projet est une application web casifiée basée sur Streamlit et Whisper."
 readme = "README.md"
 requires-python = ">=3.11"

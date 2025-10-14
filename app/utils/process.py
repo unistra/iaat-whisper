@@ -76,13 +76,20 @@ def assign_speakers(transcription: dict, diarization: Any) -> dict:
     for seg in new_transcription["segments"]:
         max_overlap = 0
         assigned_speaker = None
+        seg_start, seg_end = seg["start"], seg["end"]
+        seg_duration = seg_end - seg_start
 
         for turn, _, speaker in diarization.itertracks(yield_label=True):
+            # Ignore les tours sans chevauchement possible
+            if turn.end < seg_start:
+                continue
+            if turn.start > seg_end:
+                break  # les suivants ne peuvent plus chevaucher (tours triés dans le temps)
+
             # Calcul du chevauchement
-            overlap_start = max(seg["start"], turn.start)
-            overlap_end = min(seg["end"], turn.end)
+            overlap_start = max(seg_start, turn.start)
+            overlap_end = min(seg_end, turn.end)
             overlap_duration = max(0, overlap_end - overlap_start)
-            seg_duration = seg["end"] - seg["start"]
 
             # Vérifie si le segment chevauche au moins 50% de sa durée avec ce locuteur
             overlap_ratio = overlap_duration / seg_duration
@@ -95,6 +102,8 @@ def assign_speakers(transcription: dict, diarization: Any) -> dict:
         # Si un locuteur a un chevauchement significatif, on l'assigne
         if assigned_speaker:
             seg["speaker"] = get_random_name(assigned_speaker)
+        else:
+            seg["speaker"] = "Inconnu"
 
     return new_transcription
 
