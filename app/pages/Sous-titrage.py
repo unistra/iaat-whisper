@@ -1,9 +1,9 @@
 import streamlit as st
-from utils.log import logger, setup_logger
 import tempfile
 import mimetypes
 import os
-from whisper.utils import get_writer
+
+from utils.log import logger, setup_logger
 from utils.secrets import get_secrets
 from utils.style import custom_font
 from streamlit.runtime.secrets import secrets_singleton
@@ -117,6 +117,8 @@ if st.session_state.subtitle_result:
     srt_path = tempfile.mktemp(suffix=".srt")
     vtt_path = tempfile.mktemp(suffix=".vtt")
     try:
+
+        from whisper.utils import get_writer
         writer_srt = get_writer("srt", os.path.dirname(srt_path))
         with open(srt_path, "w", encoding="utf-8") as f:
             writer_srt.write_result(result, file=f)

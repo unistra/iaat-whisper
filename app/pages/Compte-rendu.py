@@ -1,20 +1,21 @@
 import streamlit as st
-from utils.log import logger, setup_logger
 import tempfile
 import json
 import os
 import mimetypes
+
+from utils.log import logger, setup_logger
 from streamlit.runtime.secrets import secrets_singleton
 from typing import Any
 from utils.style import custom_font
+from utils.api import format_summary, transcribe_audio_via_api
+from utils.secrets import get_secrets
 from utils.process import (
     download_nltk_resources,
     convert_and_resample_audio,
     summarize_text,
     assign_speakers,
 )
-from utils.api import format_summary, transcribe_audio_via_api
-from utils.secrets import get_secrets
 
 # Setup logger
 setup_logger()
@@ -26,6 +27,7 @@ if not os.path.exists(secrets_path):
 
 # Page configuration
 st.set_page_config(page_title="📢 Compte-rendu de réunion", page_icon=":microphone:", layout="centered")
+
 if st.secrets["app"]["use_custom_style"]:
     st.markdown(custom_font(), unsafe_allow_html=True)
 st.logo("./app/static/logo.png", size="large")
