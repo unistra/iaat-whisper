@@ -1,0 +1,28 @@
+[project]
+name = "iaat-whisper"
+version = "1.0.4"
+description = "Ce projet est une application web casifiée basée sur Streamlit et Whisper."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "accelerate==1.10.1",
+    "authlib==1.6.5",
+    "numpy==2.3.3",
+    "openai==2.3.0",
+    "openai-whisper==20250625",
+    "pyannote-audio==3.4.0",
+    "sounddevice==0.5.2",
+    "streamlit==1.50.0",
+    "sumy==0.11.0",
+    "transformers==4.57.0",
+]
+
+[dependency-groups]
+dev = [
+    "coverage==7.6.12",
+    "pre-commit==4.1.0",
+    "pyright==1.1.396",
+    "pytest==8.3.5",
+    "pytest-mock==3.14.0",
+    "ruff==0.9.10",
+]

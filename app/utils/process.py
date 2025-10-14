@@ -1,14 +1,9 @@
-from functools import cache
-import nltk
-import torchaudio
-import torchaudio.transforms as T
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lex_rank import LexRankSummarizer
 import copy
-from typing import Any
 import subprocess
 import re
+
+from functools import cache
+from typing import Any
 from utils.api import translate_text
 
 
@@ -16,7 +11,7 @@ def download_nltk_resources() -> None:
     """
     Download the necessary NLTK resources for tokenization.
     """
-
+    import nltk
     nltk.download("punkt", quiet=True)
     nltk.download("punkt_tab", quiet=True)
 
@@ -44,6 +39,8 @@ def get_random_name(speaker: str) -> str:
 
 def convert_and_resample_audio(input_path: str, output_path: str, target_sr=16000) -> None:
     """Load an audio file (MP3, WAV, etc.), convert it to WAV 16 kHz, and save it."""
+    import torchaudio
+    import torchaudio.transforms as T
     waveform, sr = torchaudio.load(input_path)
     if sr != target_sr:
         resampler = T.Resample(orig_freq=sr, new_freq=target_sr)
@@ -55,6 +52,9 @@ def summarize_text(text: str, num_sentences=5, language="french") -> str:
     """
     Summarize a text using LexRank.
     """
+    from sumy.parsers.plaintext import PlaintextParser
+    from sumy.nlp.tokenizers import Tokenizer
+    from sumy.summarizers.lex_rank import LexRankSummarizer
     try:
         tokenizer = Tokenizer(language)
     except Exception:
@@ -76,13 +76,20 @@ def assign_speakers(transcription: dict, diarization: Any) -> dict:
     for seg in new_transcription["segments"]:
         max_overlap = 0
         assigned_speaker = None
+        seg_start, seg_end = seg["start"], seg["end"]
+        seg_duration = seg_end - seg_start
 
         for turn, _, speaker in diarization.itertracks(yield_label=True):
+            # Ignore les tours sans chevauchement possible
+            if turn.end < seg_start:
+                continue
+            if turn.start > seg_end:
+                break  # les suivants ne peuvent plus chevaucher (tours triés dans le temps)
+
             # Calcul du chevauchement
-            overlap_start = max(seg["start"], turn.start)
-            overlap_end = min(seg["end"], turn.end)
+            overlap_start = max(seg_start, turn.start)
+            overlap_end = min(seg_end, turn.end)
             overlap_duration = max(0, overlap_end - overlap_start)
-            seg_duration = seg["end"] - seg["start"]
 
             # Vérifie si le segment chevauche au moins 50% de sa durée avec ce locuteur
             overlap_ratio = overlap_duration / seg_duration
@@ -95,6 +102,8 @@ def assign_speakers(transcription: dict, diarization: Any) -> dict:
         # Si un locuteur a un chevauchement significatif, on l'assigne
         if assigned_speaker:
             seg["speaker"] = get_random_name(assigned_speaker)
+        else:
+            seg["speaker"] = "Inconnu"
 
     return new_transcription
 
