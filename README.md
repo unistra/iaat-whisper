@@ -89,8 +89,8 @@ les traduire en plusieurs langues.
     -e LLM_TEMPERATURE="0.4" \
     -e USE_CUSTOM_STYLE="false" \
     -e SUMY_LENGTH_DEFAULT="80" \
-    -e WHISPER_MODEL = "turbo"\
-    -e TRANSCRIPTION_MODE = "local" \
+    -e WHISPER_MODEL="turbo"\
+    -e TRANSCRIPTION_MODE="local" \
     whisper-app
   ```
 
