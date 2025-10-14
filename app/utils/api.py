@@ -1,7 +1,8 @@
-from openai import OpenAI
-from jinja2 import Environment, FileSystemLoader
 import os
 import re
+
+from openai import OpenAI
+from jinja2 import Environment, FileSystemLoader
 from typing import List, Literal
 
 

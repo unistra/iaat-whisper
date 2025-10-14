@@ -121,11 +121,11 @@ if st.session_state.subtitle_result:
         from whisper.utils import get_writer
         writer_srt = get_writer("srt", os.path.dirname(srt_path))
         with open(srt_path, "w", encoding="utf-8") as f:
-            writer_srt.write_result(result, file=f)
+            writer_srt.write_result(result, file=f) # type: ignore
 
         writer_vtt = get_writer("vtt", os.path.dirname(vtt_path))
         with open(vtt_path, "w", encoding="utf-8") as f:
-            writer_vtt.write_result(result, file=f)
+            writer_vtt.write_result(result, file=f) # type: ignore
 
         with open(srt_path, "r") as f:
             srt_content = f.read()

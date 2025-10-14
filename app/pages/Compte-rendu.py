@@ -225,6 +225,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
             "📝 Télécharger la version détaillée (JSON)", json_content, "transcription.json", "application/json"
         )
 
+    transcript_with_speakers = ""
     if diarization_enabled:
         st.write("🗣️ Transcription avec intervenants")
 
