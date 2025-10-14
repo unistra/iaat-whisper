@@ -36,14 +36,6 @@ def custom_font() -> str:
 
     [data-testid="stIconMaterial"] {
         font-family: 'Material Symbols Rounded' !important;
-        font-style: normal !important;
-        font-weight: normal !important;
-        speak: none !important;
-        display: inline-block !important;
-        white-space: nowrap !important;
-        direction: ltr !important;
-        -webkit-font-feature-settings: 'liga' !important;
-        -webkit-font-smoothing: antialiased !important;
     }
 
     .block-container {
