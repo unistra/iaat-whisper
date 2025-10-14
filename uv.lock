@@ -1038,7 +1038,7 @@ wheels = [
 
 [[package]]
 name = "iaat-whisper"
-version = "1.0.3"
+version = "1.0.4"
 source = { virtual = "." }
 dependencies = [
     { name = "accelerate" },
