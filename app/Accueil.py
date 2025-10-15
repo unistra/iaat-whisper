@@ -38,11 +38,11 @@ st.markdown("🔑 **Authentification** : Utilisation de cas, un compte est néce
 
 st.markdown("💡 **Feedback bienvenu** : Si vous souhaitez tester et nous faire un retour, écrivez-nous à [dnum-ia@unistra.fr](mailto:dnum-ia@unistra.fr).")
 
-st.header("Compte-rendu de réunion")
+st.header("Transcription")
 st.write("Téléversez un fichier audio ou utilisez le micro pour générer une transcription, identifiez les intervenants et créez un compte-rendu en Markdown.")
-st.page_link("pages/Compte-rendu.py", label="Accéder au compte-rendu", icon="📝")
+st.page_link("pages/1_Transcription.py", label="Accéder à la transcription", icon="📝")
 
 st.header("Sous-titrage de vidéos")
 st.write("Téléversez votre vidéo, générez des sous-titres synchronisés et traduisez-les si nécessaire.")
-st.page_link("pages/Sous-titrage.py", label="Accéder au sous-titrage", icon="🎬")
+st.page_link("pages/2_Sous-titrage.py", label="Accéder au sous-titrage", icon="🎬")
 

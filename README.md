@@ -96,7 +96,7 @@ les traduire en plusieurs langues.
 
 ## Fonctionnalités
 
-### Compte-rendu de Réunion
+### Transcription
 - Enregistrement direct via microphone
 - Support des fichiers audio (mp3, wav, m4a)
 - Identification des intervenants (diarisation)

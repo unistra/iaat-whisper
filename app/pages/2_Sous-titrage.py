@@ -143,39 +143,41 @@ if st.session_state.subtitle_result:
             st.download_button("📥 Télécharger les sous-titres (VTT)", vtt_content, "subtitles.vtt", "text/vtt")
 
         # Traduction du texte
-        language_labels = {
-            "fr": "French",
-            "en": "English",
-            "de": "German",
-            "it": "Italian",
-            "es": "Spanish",
-        }
-        language_target = st.selectbox(
-            "Choisissez la langue de traduction :", ["", "fr", "en", "de", "it", "es"], index=0
-        )
-
-        if language_target != "" and language_target != detected_language:
-            logger.info(f"User '{st.user.name}' is translating subtitles to '{language_target}'.")
-            translated_text = translate(
-                st.secrets["llm"]["url"],
-                st.secrets["llm"]["token"],
-                st.secrets["llm"]["model"],
-                st.secrets["llm"]["max_tokens"],
-                srt_content,
-                language_labels[language_target],
+        translate_enabled = st.checkbox("Traduire les sous-titres (expérimental)", value=False)
+        if translate_enabled:
+            language_labels = {
+                "fr": "French",
+                "en": "English",
+                "de": "German",
+                "it": "Italian",
+                "es": "Spanish",
+            }
+            language_target = st.selectbox(
+                "Choisissez la langue de traduction :", ["", "fr", "en", "de", "it", "es"], index=0
             )
 
-            # Affichage des sous-titres traduits
-            st.subheader("📜 Sous-titres traduits")
-            st.code(translated_text, language="plaintext", height=200)
+            if language_target != "" and language_target != detected_language:
+                logger.info(f"User '{st.user.name}' is translating subtitles to '{language_target}'.")
+                translated_text = translate(
+                    st.secrets["llm"]["url"],
+                    st.secrets["llm"]["token"],
+                    st.secrets["llm"]["model"],
+                    st.secrets["llm"]["max_tokens"],
+                    srt_content,
+                    language_labels[language_target],
+                )
 
-            # Boutons de téléchargement des sous-titres traduits
-            st.download_button(
-                "💽 Télécharger les sous-titres traduits (SRT)",
-                translated_text,
-                "translated_subtitles.srt",
-                "text/plain",
-            )
+                # Affichage des sous-titres traduits
+                st.subheader("📜 Sous-titres traduits")
+                st.code(translated_text, language="plaintext", height=200)
+
+                # Boutons de téléchargement des sous-titres traduits
+                st.download_button(
+                    "💽 Télécharger les sous-titres traduits (SRT)",
+                    translated_text,
+                    "translated_subtitles.srt",
+                    "text/plain",
+                )
 
     except Exception as e:
         logger.error(f"Error during subtitle file generation or translation: {str(e)}")
