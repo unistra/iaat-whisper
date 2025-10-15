@@ -42,7 +42,13 @@ st.markdown(f"👋 Bonjour {st.user.name}, prêt à transformer vos discussions 
 
 st.title("Transcription")
 
-diarization_enabled = st.checkbox("🔍 Identifier les différents intervenants (expérimental)", value=False)
+def on_diarization_change():
+    st.session_state.transcription_result = None
+    st.session_state.summary = None
+
+diarization_enabled = st.checkbox(
+    "🔍 Identifier les différents intervenants (expérimental)", value=False, on_change=on_diarization_change
+)
 
 
 @st.cache_resource
