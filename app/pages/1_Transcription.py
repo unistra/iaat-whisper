@@ -26,7 +26,7 @@ if not os.path.exists(secrets_path):
     secrets_singleton._secrets = get_secrets()
 
 # Page configuration
-st.set_page_config(page_title="📢 Compte-rendu de réunion", page_icon=":microphone:", layout="centered")
+st.set_page_config(page_title="📢 Transcription", page_icon=":microphone:", layout="centered")
 
 if st.secrets["app"]["use_custom_style"]:
     st.markdown(custom_font(), unsafe_allow_html=True)
@@ -40,9 +40,15 @@ if not st.user.is_logged_in:
 st.button("🚪 Se déconnecter", on_click=st.logout)
 st.markdown(f"👋 Bonjour {st.user.name}, prêt à transformer vos discussions en compte-rendu ?")
 
-st.title("Compte-rendu de réunion")
+st.title("Transcription")
 
-diarization_enabled = st.checkbox("🔍 Identifier les différents intervenants", value=False)
+def on_diarization_change():
+    st.session_state.transcription_result = None
+    st.session_state.summary = None
+
+diarization_enabled = st.checkbox(
+    "🔍 Identifier les différents intervenants (expérimental)", value=False, on_change=on_diarization_change
+)
 
 
 @st.cache_resource
@@ -213,7 +219,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
 
     transcript = "\n".join(f"{seg['text']}" for seg in st.session_state.transcription_result["segments"])
 
-    st.write("🗒️ Voici votre compte-rendu brut :")
+    st.write("🗒️ Voici votre transcription :")
     st.code(transcript, language="plaintext", height=200, wrap_lines=True)
     json_content = json.dumps(result, indent=4)
 
@@ -244,61 +250,63 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         )
 
     # Generate a summary of the transcription
-    st.subheader("Synthèse du compte-rendu")
+    summarize_enabled = st.checkbox("Créer un compte-rendu (expérimental)", value=False)
+    if summarize_enabled:
+        st.subheader("Compte-rendu")
 
-    # Define prompt choices
-    PROMPT_CHOICES = {
-        "Compte-rendu de réunion": "meeting_report_prompt.j2",
-        "Résumé de présentation": "presentation_summary_prompt.j2",
-        "Synthèse de discussion": "discussion_summary_prompt.j2",
-        "Prise de note rapide": "brainstorming_summary_prompt.j2",
-        "Interview (Q&A)": "interview_summary_prompt.j2",
-    }
+        # Define prompt choices
+        PROMPT_CHOICES = {
+            "Compte-rendu de réunion": "meeting_report_prompt.j2",
+            "Résumé de présentation": "presentation_summary_prompt.j2",
+            "Synthèse de discussion": "discussion_summary_prompt.j2",
+            "Prise de note rapide": "brainstorming_summary_prompt.j2",
+            "Interview (Q&A)": "interview_summary_prompt.j2",
+        }
 
-    prompt_choice = st.selectbox(
-        "Choisissez le type de synthèse :",
-        options=list(PROMPT_CHOICES.keys()),
-    )
-
-    if "summary" not in st.session_state:
-        st.session_state.summary = None
-
-    num_sentences = st.slider(
-        "Choisissez le nombre de lignes pertinentes à extraire",
-        min_value=5,
-        max_value=300,
-        value=st.secrets["app"].get("sumy_length_default", 80),
-    )
-
-    if st.button("✨ Générer une synthèse"):
-        logger.info(f"User '{st.user.name}' is generating a summary.")
-        try:
-            st.write("⏳ Analyse en cours... Prenez un café ☕")
-
-            download_nltk_resources()
-
-            text_to_summarize = text_transcription
-            if diarization_enabled:
-                text_to_summarize = transcript_with_speakers
-
-            selected_template = PROMPT_CHOICES[prompt_choice]
-            summary = summarize(
-                text_to_summarize,
-                num_sentences=num_sentences,
-                language=detected_language,
-                prompt_template=selected_template,
-            )
-            st.session_state.summary = summary
-        except Exception as e:
-            logger.error(f"Error during summarization: {str(e)}")
-            st.error(str(e))
-
-    if st.session_state.summary:
-        st.code(st.session_state.summary, language="plaintext", height=200, wrap_lines=True)
-
-        st.download_button(
-            "📥 Télécharger la synthèse (Markdown)",
-            st.session_state.summary,
-            "synthese.md",
-            "text/markdown",
+        prompt_choice = st.selectbox(
+            "Choisissez le type de synthèse :",
+            options=list(PROMPT_CHOICES.keys()),
         )
+
+        if "summary" not in st.session_state:
+            st.session_state.summary = None
+
+        num_sentences = st.slider(
+            "Choisissez le nombre de lignes pertinentes à extraire",
+            min_value=5,
+            max_value=300,
+            value=st.secrets["app"].get("sumy_length_default", 80),
+        )
+
+        if st.button("✨ Générer une synthèse"):
+            logger.info(f"User '{st.user.name}' is generating a summary.")
+            try:
+                st.write("⏳ Analyse en cours... Prenez un café ☕")
+
+                download_nltk_resources()
+
+                text_to_summarize = text_transcription
+                if diarization_enabled:
+                    text_to_summarize = transcript_with_speakers
+
+                selected_template = PROMPT_CHOICES[prompt_choice]
+                summary = summarize(
+                    text_to_summarize,
+                    num_sentences=num_sentences,
+                    language=detected_language,
+                    prompt_template=selected_template,
+                )
+                st.session_state.summary = summary
+            except Exception as e:
+                logger.error(f"Error during summarization: {str(e)}")
+                st.error(str(e))
+
+        if st.session_state.summary:
+            st.code(st.session_state.summary, language="plaintext", height=200, wrap_lines=True)
+
+            st.download_button(
+                "📥 Télécharger la synthèse (Markdown)",
+                st.session_state.summary,
+                "synthese.md",
+                "text/markdown",
+            )
