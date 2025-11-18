@@ -17,6 +17,10 @@ from utils.process import (
     assign_speakers,
 )
 
+# FIX Docker + m4a
+mimetypes.init()
+mimetypes.add_type("audio/mp4", ".m4a")
+
 # Setup logger
 setup_logger()
 
