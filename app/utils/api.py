@@ -46,6 +46,7 @@ def format_summary(
     summary: str,
     language: str = "en",
     prompt_template: str = "meeting_report_prompt.j2",
+    custom_prompt: str | None = None,
 ) -> str:
     """
     Reformats a summary into a structured report using a VLLM instance.
@@ -56,10 +57,14 @@ def format_summary(
     # Jinja2 environment for templates (chemin relatif, compatible déploiement)
     templates_dir = os.path.join(os.path.dirname(__file__), "..", "..", "templates")
     env = Environment(loader=FileSystemLoader(templates_dir))
-    system_template = env.get_template(prompt_template)
-    user_template = env.get_template("summary_user_prompt.j2")
 
-    system_prompt = system_template.render(language=language)
+    if custom_prompt:
+        system_prompt = custom_prompt
+    else:
+        system_template = env.get_template(prompt_template)
+        system_prompt = system_template.render(language=language)
+
+    user_template = env.get_template("summary_user_prompt.j2")
     user_prompt = user_template.render(summary=summary)
 
     response = client.chat.completions.create(

@@ -101,19 +101,31 @@ def diarize_audio(file_path: str) -> Any:
 
 
 @st.cache_data
-def summarize(text: str, num_sentences: int, language: str, prompt_template: str) -> str:
-    summarize = summarize_text(text, num_sentences=num_sentences, language=language)
-    format = format_summary(
-        st.secrets["llm"]["url"],
-        st.secrets["llm"]["token"],
-        st.secrets["llm"]["model"],
-        st.secrets["llm"]["max_tokens"],
-        st.secrets["llm"]["temperature"],
-        summarize,
-        language=language,
-        prompt_template=prompt_template,
-    )
-    return format
+def summarize(
+    text: str,
+    num_sentences: int,
+    language: str,
+    prompt_template: str | None,
+    custom_prompt: str | None = None,
+) -> str:
+    summarize_text_result = summarize_text(text, num_sentences=num_sentences, language=language)
+
+    kwargs = {
+        "base_url": st.secrets["llm"]["url"],
+        "authtoken": st.secrets["llm"]["token"],
+        "model": st.secrets["llm"]["model"],
+        "max_tokens": st.secrets["llm"]["max_tokens"],
+        "temperature": st.secrets["llm"]["temperature"],
+        "summary": summarize_text_result,
+        "language": language,
+    }
+
+    if custom_prompt:
+        kwargs["custom_prompt"] = custom_prompt
+    elif prompt_template:
+        kwargs["prompt_template"] = prompt_template
+
+    return format_summary(**kwargs)
 
 
 # Choose input option (file upload or microphone)
@@ -267,10 +279,17 @@ if "transcription_result" in st.session_state and st.session_state.transcription
             "Interview (Q&A)": "interview_summary_prompt.j2",
         }
 
-        prompt_choice = st.selectbox(
-            "Choisissez le type de synthèse :",
-            options=list(PROMPT_CHOICES.keys()),
-        )
+        use_custom_prompt = st.checkbox("Utiliser un prompt personnalisé")
+        custom_prompt_text = None
+        prompt_choice = None
+
+        if use_custom_prompt:
+            custom_prompt_text = st.text_area("Saisissez votre prompt personnalisé ici :", height=150)
+        else:
+            prompt_choice = st.selectbox(
+                "Choisissez le type de synthèse :",
+                options=list(PROMPT_CHOICES.keys()),
+            )
 
         if "summary" not in st.session_state:
             st.session_state.summary = None
@@ -293,12 +312,20 @@ if "transcription_result" in st.session_state and st.session_state.transcription
                 if diarization_enabled:
                     text_to_summarize = transcript_with_speakers
 
-                selected_template = PROMPT_CHOICES[prompt_choice]
+                selected_template = None
+                if not use_custom_prompt and prompt_choice:
+                    selected_template = PROMPT_CHOICES[prompt_choice]
+
+                if use_custom_prompt and not custom_prompt_text:
+                    st.error("Le prompt personnalisé ne peut pas être vide.")
+                    st.stop()
+
                 summary = summarize(
                     text_to_summarize,
                     num_sentences=num_sentences,
                     language=detected_language,
                     prompt_template=selected_template,
+                    custom_prompt=custom_prompt_text,
                 )
                 st.session_state.summary = summary
             except Exception as e:

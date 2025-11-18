@@ -158,10 +158,98 @@ def test_format_summary_with_prompt_template():
                 prompt_template=prompt_template_name
             )
 
-    # Check that get_template was called with the correct template name for system prompt
-    # and also for the user prompt
-    mock_env.get_template.assert_any_call(prompt_template_name)
-    mock_env.get_template.assert_any_call("summary_user_prompt.j2")
+        # Check that get_template was called with the correct template name for system prompt
 
-    # Check that the result is correct
-    assert result == expected_output
+        # and also for the user prompt
+
+        mock_env.get_template.assert_any_call(prompt_template_name)
+
+        mock_env.get_template.assert_any_call("summary_user_prompt.j2")
+
+    
+
+        # Check that the result is correct
+
+        assert result == expected_output
+
+    
+
+    
+
+    def test_format_summary_with_custom_prompt():
+
+        input_summary = "This is a summary."
+
+        expected_output = "This is the formatted summary."
+
+        custom_prompt = "You are a custom summarizer."
+
+    
+
+        mock_client = Mock()
+
+        mock_response = Mock()
+
+        mock_response.choices = [Mock(message=Mock(content=expected_output))]
+
+        mock_client.chat.completions.create.return_value = mock_response
+
+    
+
+        # Mock Jinja2 environment
+
+        mock_env = Mock()
+
+        mock_template = Mock()
+
+        mock_env.get_template.return_value = mock_template
+
+        mock_template.render.return_value = "rendered_user_prompt"
+
+    
+
+        with patch('utils.api.OpenAI', return_value=mock_client):
+
+            with patch('utils.api.Environment', return_value=mock_env):
+
+                result = format_summary(
+
+                    base_url="http://example.com",
+
+                    authtoken="fake_token",
+
+                    model="fake_model",
+
+                    max_tokens=1024,
+
+                    temperature=0.4,
+
+                    summary=input_summary,
+
+                    language="en",
+
+                    custom_prompt=custom_prompt
+
+                )
+
+    
+
+        # Check that get_template was called only for the user prompt
+
+        mock_env.get_template.assert_called_once_with("summary_user_prompt.j2")
+
+    
+
+        # Check that the result is correct
+
+        assert result == expected_output
+
+    
+
+        # Check that the system prompt is the custom prompt
+
+        call_args = mock_client.chat.completions.create.call_args
+
+        assert call_args[1]["messages"][0]["content"] == custom_prompt
+
+    
