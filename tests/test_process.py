@@ -180,7 +180,9 @@ Très bien, merci !"""
     ]
 
     with patch("utils.process.translate_text") as mock_translate_text:
-        mock_translate_text.side_effect = lambda base_url, authtoken, model, max_tokens, text, language: f"Translated: {text}"
+        mock_translate_text.side_effect = (
+            lambda base_url, authtoken, model, max_tokens, text, language: f"Translated: {text}"
+        )
 
         translate_srt_in_chunks("http://example.com", "dummy_token", "mistral", 1024, srt_text, "en", 50)
 

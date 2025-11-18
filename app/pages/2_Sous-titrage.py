@@ -34,10 +34,12 @@ st.markdown(f"👋 Bonjour {st.user.name}, prêt à générer des sous-titres ?"
 
 st.title("Sous-titrage de vidéos")
 
+
 @st.cache_resource
 def load_whisper_model(model_name: str) -> Any:
     import torch
     import whisper
+
     if st.secrets["app"].get("transcription_mode", "local") == "local":
         device = "cuda" if torch.cuda.is_available() else "cpu"
         return whisper.load_model(model_name, device=device)
@@ -117,15 +119,15 @@ if st.session_state.subtitle_result:
     srt_path = tempfile.mktemp(suffix=".srt")
     vtt_path = tempfile.mktemp(suffix=".vtt")
     try:
-
         from whisper.utils import get_writer
+
         writer_srt = get_writer("srt", os.path.dirname(srt_path))
         with open(srt_path, "w", encoding="utf-8") as f:
-            writer_srt.write_result(result, file=f) # type: ignore
+            writer_srt.write_result(result, file=f)  # type: ignore
 
         writer_vtt = get_writer("vtt", os.path.dirname(vtt_path))
         with open(vtt_path, "w", encoding="utf-8") as f:
-            writer_vtt.write_result(result, file=f) # type: ignore
+            writer_vtt.write_result(result, file=f)  # type: ignore
 
         with open(srt_path, "r") as f:
             srt_content = f.read()
@@ -184,7 +186,7 @@ if st.session_state.subtitle_result:
         st.error(f"❌ Une erreur est survenue : {e}")
         raise e
     finally:
-        if 'srt_path' in locals() and os.path.exists(srt_path):
+        if "srt_path" in locals() and os.path.exists(srt_path):
             os.remove(srt_path)
-        if 'vtt_path' in locals() and os.path.exists(vtt_path):
+        if "vtt_path" in locals() and os.path.exists(vtt_path):
             os.remove(vtt_path)

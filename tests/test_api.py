@@ -1,7 +1,8 @@
 from unittest import mock
 from unittest.mock import Mock, patch
-from utils.api import translate_text, format_summary, transcribe_audio_via_api # type: ignore
+from utils.api import translate_text, format_summary, transcribe_audio_via_api  # type: ignore
 from jinja2 import Environment
+
 
 def test_translate_text_success():
     input_text = """1
@@ -27,14 +28,14 @@ Je vais très bien !
     mock_response.choices = [Mock(message=Mock(content=expected_output))]
     mock_client.chat.completions.create.return_value = mock_response
 
-    with patch('utils.api.OpenAI', return_value=mock_client):
+    with patch("utils.api.OpenAI", return_value=mock_client):
         result = translate_text(
             base_url="http://example.com",
             authtoken="fake_token",
             model="fake_model",
             max_tokens=1024,
             text=input_text,
-            language="fr"
+            language="fr",
         )
 
     assert result == expected_output
@@ -73,7 +74,7 @@ John mettra à jour le calendrier.
     mock_client.chat.completions.create.return_value = mock_response
 
     # Patch de la classe OpenAI pour retourner notre mock
-    with patch('utils.api.OpenAI', return_value=mock_client):
+    with patch("utils.api.OpenAI", return_value=mock_client):
         result = format_summary(
             base_url="http://example.com",
             authtoken="fake_token",
@@ -81,7 +82,7 @@ John mettra à jour le calendrier.
             max_tokens=1024,
             temperature=0.4,
             summary=input_summary,
-            language="fr"
+            language="fr",
         )
 
     # Vérifications
@@ -112,8 +113,8 @@ def test_transcribe_audio_via_api_success():
     mock_response.model_dump.return_value = expected_output
     mock_client.audio.transcriptions.create.return_value = mock_response
 
-    with patch('utils.api.OpenAI', return_value=mock_client):
-        with patch('builtins.open', mock.mock_open(read_data=b'test_audio_data')) as mock_file:
+    with patch("utils.api.OpenAI", return_value=mock_client):
+        with patch("builtins.open", mock.mock_open(read_data=b"test_audio_data")) as mock_file:
             result = transcribe_audio_via_api(
                 base_url="http://example.com",
                 authtoken="fake_token",
@@ -145,8 +146,8 @@ def test_format_summary_with_prompt_template():
     mock_env.get_template.return_value = mock_template
     mock_template.render.return_value = "rendered_prompt"
 
-    with patch('utils.api.OpenAI', return_value=mock_client):
-        with patch('utils.api.Environment', return_value=mock_env):
+    with patch("utils.api.OpenAI", return_value=mock_client):
+        with patch("utils.api.Environment", return_value=mock_env):
             result = format_summary(
                 base_url="http://example.com",
                 authtoken="fake_token",
@@ -155,7 +156,7 @@ def test_format_summary_with_prompt_template():
                 temperature=0.4,
                 summary=input_summary,
                 language="en",
-                prompt_template=prompt_template_name
+                prompt_template=prompt_template_name,
             )
 
         # Check that get_template was called with the correct template name for system prompt
@@ -166,25 +167,16 @@ def test_format_summary_with_prompt_template():
 
         mock_env.get_template.assert_any_call("summary_user_prompt.j2")
 
-    
-
         # Check that the result is correct
 
         assert result == expected_output
 
-    
-
-    
-
     def test_format_summary_with_custom_prompt():
-
         input_summary = "This is a summary."
 
         expected_output = "This is the formatted summary."
 
         custom_prompt = "You are a custom summarizer."
-
-    
 
         mock_client = Mock()
 
@@ -193,8 +185,6 @@ def test_format_summary_with_prompt_template():
         mock_response.choices = [Mock(message=Mock(content=expected_output))]
 
         mock_client.chat.completions.create.return_value = mock_response
-
-    
 
         # Mock Jinja2 environment
 
@@ -206,50 +196,29 @@ def test_format_summary_with_prompt_template():
 
         mock_template.render.return_value = "rendered_user_prompt"
 
-    
-
-        with patch('utils.api.OpenAI', return_value=mock_client):
-
-            with patch('utils.api.Environment', return_value=mock_env):
-
+        with patch("utils.api.OpenAI", return_value=mock_client):
+            with patch("utils.api.Environment", return_value=mock_env):
                 result = format_summary(
-
                     base_url="http://example.com",
-
                     authtoken="fake_token",
-
                     model="fake_model",
-
                     max_tokens=1024,
-
                     temperature=0.4,
-
                     summary=input_summary,
-
                     language="en",
-
-                    custom_prompt=custom_prompt
-
+                    custom_prompt=custom_prompt,
                 )
-
-    
 
         # Check that get_template was called only for the user prompt
 
         mock_env.get_template.assert_called_once_with("summary_user_prompt.j2")
 
-    
-
         # Check that the result is correct
 
         assert result == expected_output
-
-    
 
         # Check that the system prompt is the custom prompt
 
         call_args = mock_client.chat.completions.create.call_args
 
         assert call_args[1]["messages"][0]["content"] == custom_prompt
-
-    

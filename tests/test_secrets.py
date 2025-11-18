@@ -1,26 +1,30 @@
 import os
 from unittest import mock
-from utils.secrets import get_secrets # type: ignore
+from utils.secrets import get_secrets  # type: ignore
+
 
 def test_get_secrets():
-    with mock.patch.dict(os.environ, {
-        "REDIRECT_URI": "https://example.com/redirect",
-        "COOKIE_SECRET": "cookie_secret_value",
-        "CLIENT_ID": "client_id_value",
-        "CLIENT_SECRET": "client_secret_value",
-        "SERVER_METADATA_URL": "https://example.com/metadata",
-        "CLIENT_PROMPT": "client_prompt_value",
-        "HUGGINGFACE_ACCESS_TOKEN": "huggingface_token",
-        "LLM_URL": "https://llm.example.com",
-        "LLM_TOKEN": "llm_token_value",
-        "LLM_MODEL": "llm_model_value",
-        "LLM_MAX_TOKENS": "16384",
-        "LLM_TEMPERATURE": "0.3",
-        "USE_CUSTOM_STYLE": "true",
-        "SUMY_LENGTH_DEFAULT": "80",
-        "WHISPER_MODEL": "turbo",
-        "TRANSCRIPTION_MODE": "api"
-    }):
+    with mock.patch.dict(
+        os.environ,
+        {
+            "REDIRECT_URI": "https://example.com/redirect",
+            "COOKIE_SECRET": "cookie_secret_value",
+            "CLIENT_ID": "client_id_value",
+            "CLIENT_SECRET": "client_secret_value",
+            "SERVER_METADATA_URL": "https://example.com/metadata",
+            "CLIENT_PROMPT": "client_prompt_value",
+            "HUGGINGFACE_ACCESS_TOKEN": "huggingface_token",
+            "LLM_URL": "https://llm.example.com",
+            "LLM_TOKEN": "llm_token_value",
+            "LLM_MODEL": "llm_model_value",
+            "LLM_MAX_TOKENS": "16384",
+            "LLM_TEMPERATURE": "0.3",
+            "USE_CUSTOM_STYLE": "true",
+            "SUMY_LENGTH_DEFAULT": "80",
+            "WHISPER_MODEL": "turbo",
+            "TRANSCRIPTION_MODE": "api",
+        },
+    ):
         secrets = get_secrets()
 
         assert secrets["auth"]["redirect_uri"] == "https://example.com/redirect"

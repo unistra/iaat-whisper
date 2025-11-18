@@ -27,5 +27,5 @@ def get_secrets():
             "sumy_length_default": int(os.getenv("SUMY_LENGTH_DEFAULT", "80")),
             "whisper_model": os.getenv("WHISPER_MODEL", "turbo"),
             "transcription_mode": os.getenv("TRANSCRIPTION_MODE", "local"),
-        }
+        },
     }

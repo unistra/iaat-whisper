@@ -1,6 +1,7 @@
 from streamlit.testing.v1 import AppTest
 import pytest
 
+
 def test_app():
     app = AppTest.from_file("../app/Accueil.py")
     app.run(timeout=10)

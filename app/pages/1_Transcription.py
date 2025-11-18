@@ -46,9 +46,11 @@ st.markdown(f"👋 Bonjour {st.user.name}, prêt à transformer vos discussions 
 
 st.title("Transcription")
 
+
 def on_diarization_change():
     st.session_state.transcription_result = None
     st.session_state.summary = None
+
 
 diarization_enabled = st.checkbox(
     "🔍 Identifier les différents intervenants (expérimental)", value=False, on_change=on_diarization_change
@@ -59,6 +61,7 @@ diarization_enabled = st.checkbox(
 def load_whisper_model(model_name: str) -> Any:
     import torch
     import whisper
+
     if st.secrets["app"].get("transcription_mode", "local") == "local":
         device = "cuda" if torch.cuda.is_available() else "cpu"
         return whisper.load_model(model_name, device=device)
@@ -69,6 +72,7 @@ def load_whisper_model(model_name: str) -> Any:
 def load_diarization_model() -> Any:
     import torch
     from pyannote.audio import Pipeline
+
     access_token = st.secrets["huggingface"]["token"]
     pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=access_token)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

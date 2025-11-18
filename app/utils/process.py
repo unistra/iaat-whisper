@@ -12,6 +12,7 @@ def download_nltk_resources() -> None:
     Download the necessary NLTK resources for tokenization.
     """
     import nltk
+
     nltk.download("punkt", quiet=True)
     nltk.download("punkt_tab", quiet=True)
 
@@ -41,6 +42,7 @@ def convert_and_resample_audio(input_path: str, output_path: str, target_sr=1600
     """Load an audio file (MP3, WAV, etc.), convert it to WAV 16 kHz, and save it."""
     import torchaudio
     import torchaudio.transforms as T
+
     waveform, sr = torchaudio.load(input_path)
     if sr != target_sr:
         resampler = T.Resample(orig_freq=sr, new_freq=target_sr)
@@ -55,6 +57,7 @@ def summarize_text(text: str, num_sentences=5, language="french") -> str:
     from sumy.parsers.plaintext import PlaintextParser
     from sumy.nlp.tokenizers import Tokenizer
     from sumy.summarizers.lex_rank import LexRankSummarizer
+
     try:
         tokenizer = Tokenizer(language)
     except Exception:
@@ -157,7 +160,13 @@ def split_srt(srt_text: str, max_chars: int) -> list[str]:
 
 
 def translate_srt_in_chunks(
-    base_url: str, authtoken: str, model: str, max_tokens: int, srt_text: str, language: str = "en", max_chars: int = 500
+    base_url: str,
+    authtoken: str,
+    model: str,
+    max_tokens: int,
+    srt_text: str,
+    language: str = "en",
+    max_chars: int = 500,
 ) -> str:
     """
     Translate an SRT file in chunks to avoid a too long prompt.
