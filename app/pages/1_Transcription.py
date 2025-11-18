@@ -179,7 +179,7 @@ if input_option == "📂 Télécharger un fichier":
                     tmp_filename = tmp_file.name
                 process_transcription(tmp_filename)
             else:
-                logger.warning(f"Uploaded file '{uploaded_file.name}' has unsupported format.")
+                logger.warning(f"Uploaded file '{uploaded_file.name}' has unsupported format : {mime_type}")
                 st.error("❌ Format non reconnu ! Merci d'ajouter un fichier audio valide.")
 
 # Microphone input option
