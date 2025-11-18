@@ -39,15 +39,18 @@ def get_random_name(speaker: str) -> str:
 
 
 def convert_and_resample_audio(input_path: str, output_path: str, target_sr=16000) -> None:
-    """Load an audio file (MP3, WAV, etc.), convert it to WAV 16 kHz, and save it."""
-    import torchaudio
-    import torchaudio.transforms as T
-
-    waveform, sr = torchaudio.load(input_path)
-    if sr != target_sr:
-        resampler = T.Resample(orig_freq=sr, new_freq=target_sr)
-        waveform = resampler(waveform)
-    torchaudio.save(output_path, waveform, target_sr)
+    """
+    Convert any audio file (MP3, WAV, M4A, FLAC, etc.) to WAV, 16 kHz, mono.
+    """
+    cmd = [
+        "ffmpeg",
+        "-y",
+        "-i", input_path,
+        "-ar", str(target_sr),
+        "-ac", "1",
+        output_path
+    ]
+    subprocess.run(cmd, check=True)
 
 
 def summarize_text(text: str, num_sentences=5, language="french") -> str:
