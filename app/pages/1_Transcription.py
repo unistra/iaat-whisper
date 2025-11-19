@@ -3,7 +3,9 @@ import tempfile
 import json
 import os
 import mimetypes
+import io
 
+from markdown_pdf import MarkdownPdf, Section
 from utils.log import logger, setup_logger
 from streamlit.runtime.secrets import secrets_singleton
 from typing import Any
@@ -343,9 +345,26 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         if st.session_state.summary:
             st.code(st.session_state.summary, language="plaintext", height=200, wrap_lines=True)
 
-            st.download_button(
+            col1_summary, col2_summary = st.columns(2)
+            with col1_summary:
+                st.download_button(
                 "📥 Télécharger la synthèse (Markdown)",
                 st.session_state.summary,
                 "synthese.md",
                 "text/markdown",
             )
+            with col2_summary:
+                # Build the PDF
+                pdf = MarkdownPdf()
+                pdf.meta["title"] = "Synthèse de la transcription"
+                pdf.meta["author"] = st.user.name
+                pdf.add_section(Section(st.session_state.summary, toc=False))
+                # Download button
+                pdf_bytes = io.BytesIO()
+                pdf.save_bytes(pdf_bytes)
+                st.download_button(
+                    "📄 Télécharger la synthèse (PDF)",
+                    pdf_bytes,
+                    "synthese.pdf",
+                    "application/pdf",
+                )
