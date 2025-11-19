@@ -154,8 +154,16 @@ if st.session_state.subtitle_result:
                 "it": "Italian",
                 "es": "Spanish",
             }
+            language_labels_fr = {
+                "fr": "Français",
+                "en": "Anglais",
+                "de": "Allemand",
+                "it": "Italien",
+                "es": "Espagnol",
+            }
             language_target = st.selectbox(
-                "Choisissez la langue de traduction :", filter(lambda x: x != detected_language, ["", "fr", "en", "de", "it", "es"]), index=0
+                "Choisissez la langue de traduction :", filter(lambda x: x != detected_language, ["", "fr", "en", "de", "it", "es"]), index=0,
+                format_func=lambda x: language_labels_fr[x] if x != "" else ""
             )
 
             if language_target != "" and language_target != detected_language:

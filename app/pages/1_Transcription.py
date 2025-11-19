@@ -268,7 +268,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         st.code(transcript_with_speakers, height=200, wrap_lines=True)
 
         st.download_button(
-            "📑 Télécharger la version annotée avec les intervenants",
+            "📑 Télécharger la version annotée (TXT)",
             transcript_with_speakers,
             "transcript_with_speakers.txt",
             "text/plain",
