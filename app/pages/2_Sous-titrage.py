@@ -75,7 +75,7 @@ if "subtitle_result" not in st.session_state:
     st.session_state.subtitle_result = None
 
 # Chargement du fichier vidéo
-uploaded_video = st.file_uploader("Déposez votre fichier vidéo ici", type=["mp4", "mov", "avi"])
+uploaded_video = st.file_uploader("Déposez votre fichier vidéo ici", type=["mp4", "mov", "avi"], help="Formats supportés : mp4, mov, avi")
 
 if uploaded_video is not None:
     if st.button("📝 Générer les sous-titres"):
@@ -145,7 +145,7 @@ if st.session_state.subtitle_result:
             st.download_button("📥 Télécharger les sous-titres (VTT)", vtt_content, "subtitles.vtt", "text/vtt")
 
         # Traduction du texte
-        translate_enabled = st.checkbox("Traduire les sous-titres (expérimental)", value=False)
+        translate_enabled = st.checkbox("Traduire les sous-titres (expérimental)", value=False, help="Cochez cette case pour afficher les options de traduction des sous‑titres générés.")
         if translate_enabled:
             language_labels = {
                 "fr": "French",

@@ -53,7 +53,10 @@ def on_diarization_change():
 
 
 diarization_enabled = st.checkbox(
-    "🔍 Identifier les différents intervenants (expérimental)", value=False, on_change=on_diarization_change
+    "🔍 Identifier les différents intervenants (expérimental)",
+    value=False,
+    on_change=on_diarization_change,
+    help="Cochez cette case pour tenter d’identifier qui parle et à quel moment. Le traitement sera plus long et plus exigeant en ressources."
 )
 
 
@@ -134,7 +137,7 @@ def summarize(
 
 # Choose input option (file upload or microphone)
 input_option = st.radio(
-    "Comment souhaitez-vous ajouter l'audio ?", ("📂 Télécharger un fichier", "🎤 Utiliser le micro")
+    "Comment souhaitez-vous ajouter l'audio ?", ("📂 Téléverser un fichier", "🎤 Utiliser le micro")
 )
 
 # Keep track of the transcription result and summary in session state
@@ -185,8 +188,8 @@ def process_transcription(tmp_filename: str) -> None:
 
 
 # File upload option
-if input_option == "📂 Télécharger un fichier":
-    uploaded_file = st.file_uploader("Déposez votre fichier audio ici", type=["mp3", "wav", "m4a"])
+if input_option == "📂 Téléverser un fichier":
+    uploaded_file = st.file_uploader("Déposez votre fichier audio ici", type=["mp3", "wav", "m4a"], help="Formats supportés : mp3, wav, m4a")
 
     if uploaded_file is not None:
         if st.button("📝 Transformer l'audio en texte"):
@@ -270,7 +273,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
         )
 
     # Generate a summary of the transcription
-    summarize_enabled = st.checkbox("Créer un compte-rendu (expérimental)", value=False)
+    summarize_enabled = st.checkbox("Créer un compte-rendu (expérimental)", value=False, help="Cochez cette case pour afficher les options de génération de synthèse du texte transcrit.")
     if summarize_enabled:
         st.subheader("Compte-rendu")
 
@@ -283,7 +286,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
             "Interview (Q&A)": "interview_summary_prompt.j2",
         }
 
-        use_custom_prompt = st.checkbox("Utiliser un prompt personnalisé")
+        use_custom_prompt = st.checkbox("Utiliser un prompt personnalisé", help="Cochez cette case pour saisir votre propre prompt d’instructions afin de générer la synthèse à la place des options prédéfinies.")
         custom_prompt_text = None
         prompt_choice = None
 
@@ -303,6 +306,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
             min_value=5,
             max_value=300,
             value=st.secrets["app"].get("sumy_length_default", 80),
+            help="Choisir un nombre plus élevé donnera une synthèse plus longue et plus détaillée.",
         )
 
         if st.button("✨ Générer une synthèse"):
