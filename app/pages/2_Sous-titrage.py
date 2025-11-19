@@ -155,7 +155,7 @@ if st.session_state.subtitle_result:
                 "es": "Spanish",
             }
             language_target = st.selectbox(
-                "Choisissez la langue de traduction :", ["", "fr", "en", "de", "it", "es"], index=0
+                "Choisissez la langue de traduction :", filter(lambda x: x != detected_language, ["", "fr", "en", "de", "it", "es"]), index=0
             )
 
             if language_target != "" and language_target != detected_language:
