@@ -5,17 +5,17 @@ description = "Ce projet est une application web casifiée basée sur Streamlit 
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "accelerate==1.10.1",
+    "accelerate==1.11.0",
     "authlib==1.6.5",
     "markdown-pdf>=1.10",
-    "numpy==2.3.3",
-    "openai==2.3.0",
+    "numpy==2.3.5",
+    "openai==2.8.1",
     "openai-whisper==20250625",
     "pyannote-audio==3.4.0",
-    "sounddevice==0.5.2",
-    "streamlit==1.50.0",
+    "sounddevice==0.5.3",
+    "streamlit==1.51.0",
     "sumy==0.11.0",
-    "transformers==4.57.0",
+    "transformers==4.57.1",
 ]
 
 [dependency-groups]
