@@ -23,6 +23,7 @@ from utils.process import (
 # FIX Docker + m4a
 mimetypes.init()
 mimetypes.add_type("audio/mp4", ".m4a")
+mimetypes.add_type("video/mp4", ".m4v")
 
 # Setup logger
 setup_logger()
