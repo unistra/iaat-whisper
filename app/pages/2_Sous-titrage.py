@@ -75,7 +75,7 @@ if "subtitle_result" not in st.session_state:
     st.session_state.subtitle_result = None
 
 # Chargement du fichier vidéo
-uploaded_video = st.file_uploader("Déposez votre fichier vidéo ici", type=["mp4", "mov", "avi"], help="Formats supportés : mp4, mov, avi")
+uploaded_video = st.file_uploader("Déposez votre fichier vidéo ici", type=["m4v", "mp4", "mov", "avi"], help="Formats supportés : m4v, mp4, mov, avi")
 
 if uploaded_video is not None:
     if st.button("📝 Générer les sous-titres"):

@@ -15,6 +15,7 @@ from utils.secrets import get_secrets
 from utils.process import (
     download_nltk_resources,
     convert_and_resample_audio,
+    extract_audio_from_video,
     summarize_text,
     assign_speakers,
 )
@@ -155,54 +156,63 @@ if "previous_input_option" in st.session_state and st.session_state.previous_inp
 st.session_state.previous_input_option = input_option
 
 
-def process_transcription(tmp_filename: str) -> None:
+def process_transcription(tmp_filename: str, type: str = "audio") -> None:
     """
     Process the transcription and diarization of the audio
     """
     logger.info(f"Starting transcription process for file '{tmp_filename}'")
     resampled_audio = None
+    audio_file = tmp_filename
     try:
         st.write("⏳ Analyse en cours... Prenez un café ☕")
 
+        if type == "video":
+            logger.info(f"Extracting audio from video file '{tmp_filename}'")
+            # Extraire l'audio de la vidéo
+            audio_file = tmp_filename.rsplit(".", 1)[0] + ".wav"
+            extract_audio_from_video(tmp_filename, audio_file)
+
         # Transcription
-        transcription = transcribe_audio(tmp_filename)
+        transcription = transcribe_audio(audio_file)
 
         # Diarisation Pyannote (si activée)
         if diarization_enabled:
             st.write("🔍 Identification des intervenants en cours...")
             # Conversion et resampling
-            resampled_audio = tmp_filename.rsplit(".", 1)[0] + "_resampled.wav"
-            convert_and_resample_audio(tmp_filename, resampled_audio)
+            resampled_audio = audio_file.rsplit(".", 1)[0] + "_resampled.wav"
+            convert_and_resample_audio(audio_file, resampled_audio)
             diarization = diarize_audio(resampled_audio)
             transcription = assign_speakers(transcription, diarization)
 
         st.session_state.transcription_result = transcription
         st.session_state.summary = None
-        logger.info(f"Successfully transcribed file '{tmp_filename}'")
+        logger.info(f"Successfully transcribed file '{audio_file}'")
 
     except Exception as e:
-        logger.error(f"Error during transcription/diarization for file '{tmp_filename}': {str(e)}")
+        logger.error(f"Error during transcription/diarization for file '{audio_file}': {str(e)}")
         st.error(f"❌ Erreur pendant la transcription/diarisation : {str(e)}")
     finally:
         os.remove(tmp_filename)
+        if audio_file != tmp_filename:
+            os.remove(audio_file)
         if diarization_enabled and resampled_audio is not None:
             os.remove(resampled_audio)
 
 
 # File upload option
 if input_option == "📂 Téléverser un fichier":
-    uploaded_file = st.file_uploader("Déposez votre fichier audio ici", type=["mp3", "wav", "m4a"], help="Formats supportés : mp3, wav, m4a")
+    uploaded_file = st.file_uploader("Déposez votre fichier audio ici", type=["mp3", "wav", "m4a", "m4v", "mp4", "mov", "avi"], help="Formats supportés : mp3, wav, m4a, m4v, mp4, mov, avi")
 
     if uploaded_file is not None:
         if st.button("📝 Transformer l'audio en texte"):
             file_extension = uploaded_file.name.split(".")[-1]
             mime_type, _ = mimetypes.guess_type(uploaded_file.name)
-            if mime_type and mime_type.startswith("audio"):
+            if mime_type and (mime_type.startswith("audio") or  mime_type.startswith("video")):
                 logger.info(f"User '{st.user.name}' uploaded file '{uploaded_file.name}' for transcription.")
                 with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
                     tmp_file.write(uploaded_file.read())
                     tmp_filename = tmp_file.name
-                process_transcription(tmp_filename)
+                process_transcription(tmp_filename, "video" if mime_type.startswith("video") else "audio")
             else:
                 logger.warning(f"Uploaded file '{uploaded_file.name}' has unsupported format : {mime_type}")
                 st.error("❌ Format non reconnu ! Merci d'ajouter un fichier audio valide.")
