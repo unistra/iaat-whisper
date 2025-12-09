@@ -63,6 +63,27 @@ diarization_enabled = st.checkbox(
     help="Cochez cette case pour tenter d’identifier qui parle et à quel moment. Le traitement sera plus long et plus exigeant en ressources."
 )
 
+WHISPER_LANGUAGES = {
+    "Auto-détection": None,
+    "Français": "fr",
+    "Anglais": "en",
+    "Espagnol": "es",
+    "Allemand": "de",
+    "Italien": "it"
+}
+
+if "selected_language_code" not in st.session_state:
+    st.session_state.selected_language_code = None
+
+selected_language_name = st.selectbox(
+    "Forcer la langue de transcription (facultatif)",
+    options=list(WHISPER_LANGUAGES.keys()),
+    index=0, # Default to "Auto-détection"
+    on_change=on_diarization_change,
+    help="Sélectionnez une langue pour la transcription. L'auto-détection est utilisée par défaut."
+)
+st.session_state.selected_language_code = WHISPER_LANGUAGES[selected_language_name]
+
 
 @st.cache_resource
 def load_whisper_model(model_name: str) -> Any:
@@ -92,16 +113,17 @@ diarization_model = load_diarization_model() if diarization_enabled else None
 
 
 @st.cache_data
-def transcribe_audio(file_path: str) -> dict:
+def transcribe_audio(file_path: str, language: str | None) -> dict:
     if st.secrets["app"].get("transcription_mode", "local") == "api":
         return transcribe_audio_via_api(
             st.secrets["llm"]["url"],
             st.secrets["llm"]["token"],
             st.secrets["app"].get("whisper_model", "turbo"),
             file_path,
+            language=language,
         )
     elif model is not None:
-        return model.transcribe(file_path, language=None)
+        return model.transcribe(file_path, language=language)
     else:
         raise ValueError("Transcription mode is 'local' but the model could not be loaded.")
 
@@ -157,7 +179,7 @@ if "previous_input_option" in st.session_state and st.session_state.previous_inp
 st.session_state.previous_input_option = input_option
 
 
-def process_transcription(tmp_filename: str, type: str = "audio") -> None:
+def process_transcription(tmp_filename: str, type: str = "audio", language: str | None = None) -> None:
     """
     Process the transcription and diarization of the audio
     """
@@ -174,7 +196,7 @@ def process_transcription(tmp_filename: str, type: str = "audio") -> None:
             extract_audio_from_video(tmp_filename, audio_file)
 
         # Transcription
-        transcription = transcribe_audio(audio_file)
+        transcription = transcribe_audio(audio_file, language)
 
         # Diarisation Pyannote (si activée)
         if diarization_enabled:
@@ -213,7 +235,7 @@ if input_option == "📂 Téléverser un fichier":
                 with tempfile.NamedTemporaryFile(delete=False, suffix=f".{file_extension}") as tmp_file:
                     tmp_file.write(uploaded_file.read())
                     tmp_filename = tmp_file.name
-                process_transcription(tmp_filename, "video" if mime_type.startswith("video") else "audio")
+                process_transcription(tmp_filename, "video" if mime_type.startswith("video") else "audio", st.session_state.selected_language_code)
             else:
                 logger.warning(f"Uploaded file '{uploaded_file.name}' has unsupported format : {mime_type}")
                 st.error("❌ Format non reconnu ! Merci d'ajouter un fichier audio valide.")
@@ -243,7 +265,7 @@ elif input_option == "🎤 Utiliser le micro":
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
                 tmp_file.write(st.session_state.audio_data)
                 tmp_filename = tmp_file.name
-            process_transcription(tmp_filename)
+            process_transcription(tmp_filename, language=st.session_state.selected_language_code)
 
 # Show the transcription result
 if "transcription_result" in st.session_state and st.session_state.transcription_result:

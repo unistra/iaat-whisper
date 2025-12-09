@@ -34,6 +34,26 @@ st.markdown(f"👋 Bonjour {st.user.name}, prêt à générer des sous-titres ?"
 
 st.title("Sous-titrage de vidéos")
 
+WHISPER_LANGUAGES = {
+    "Auto-détection": None,
+    "Français": "fr",
+    "Anglais": "en",
+    "Espagnol": "es",
+    "Allemand": "de",
+    "Italien": "it"
+}
+
+if "selected_language_code_subtitling" not in st.session_state:
+    st.session_state.selected_language_code_subtitling = None
+
+selected_language_name = st.selectbox(
+    "Forcer la langue de transcription (facultatif)",
+    options=list(WHISPER_LANGUAGES.keys()),
+    index=0, # Default to "Auto-détection"
+    help="Sélectionnez une langue pour la transcription. L'auto-détection est utilisée par défaut."
+)
+st.session_state.selected_language_code_subtitling = WHISPER_LANGUAGES[selected_language_name]
+
 
 @st.cache_resource
 def load_whisper_model(model_name: str) -> Any:
@@ -50,7 +70,7 @@ model = load_whisper_model(st.secrets["app"].get("whisper_model", "turbo"))
 
 
 @st.cache_data
-def transcribe_audio(file_path: str) -> dict:
+def transcribe_audio(file_path: str, language: str | None) -> dict:
     if st.secrets["app"].get("transcription_mode", "local") == "api":
         return transcribe_audio_via_api(
             st.secrets["llm"]["url"],
@@ -58,9 +78,10 @@ def transcribe_audio(file_path: str) -> dict:
             st.secrets["app"].get("whisper_model", "turbo"),
             file_path,
             timestamp_granularities=["segment", "word"],
+            language=language,
         )
     elif model is not None:
-        return model.transcribe(file_path, language=None)
+        return model.transcribe(file_path, language=language)
     else:
         raise ValueError("Transcription mode is 'local' but the model could not be loaded.")
 
@@ -95,7 +116,7 @@ if uploaded_video is not None:
             try:
                 logger.info(f"Starting subtitle generation for file '{video_path}'")
                 st.write("⏳ Analyse en cours... Prenez un café ☕")
-                transcription = transcribe_audio(audio_path)
+                transcription = transcribe_audio(audio_path, st.session_state.selected_language_code_subtitling)
 
                 # Stocker la transcription dans la session
                 st.session_state.subtitle_result = transcription

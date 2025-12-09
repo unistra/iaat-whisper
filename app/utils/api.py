@@ -89,6 +89,7 @@ def transcribe_audio_via_api(
     model: str,
     file_path: str,
     timestamp_granularities: List[Literal["word", "segment"]] = ["segment", "word"],
+    language: str | None = None,
 ) -> dict:
     """
     Transcribes an audio file using an OpenAI-compatible API.
@@ -102,6 +103,7 @@ def transcribe_audio_via_api(
             response_format="verbose_json",
             timestamp_granularities=timestamp_granularities,
             timeout=3600,  # 1 hour timeout
+            language=language,
         )
 
     # The API returns a pydantic model, we need to convert it to a dict
