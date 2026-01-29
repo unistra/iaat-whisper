@@ -19,7 +19,7 @@ from utils.process import (
     summarize_text,
     assign_speakers,
 )
-from utils.resource import load_whisper_model, load_diarization_model
+from utils.resource import load_whisper_model, load_diarization_model, get_gpu_lock, MAX_JOBS
 
 # FIX Docker + m4a
 mimetypes.init()
@@ -51,6 +51,9 @@ st.markdown(f"👋 Bonjour {st.user.name}, prêt à transformer vos discussions 
 
 st.title("Transcription")
 
+lock = get_gpu_lock()
+# st.write(f"Tâches disponibles : {lock._value} / {MAX_JOBS}")
+# st.write(f"ID du verrou actuel : {id(lock)}")
 
 def on_diarization_change():
     st.session_state.transcription_result = None
@@ -163,6 +166,15 @@ def process_transcription(tmp_filename: str, type: str = "audio", language: str 
     logger.info(f"Starting transcription process for file '{tmp_filename}'")
     resampled_audio = None
     audio_file = tmp_filename
+
+    with st.spinner("⏳ En attente de disponibilité..."):
+        acquired = lock.acquire(blocking=True, timeout=300)
+
+    if not acquired:
+        st.warning("⚠️ Le système est actuellement très sollicité. Merci de réessayer dans quelques instants.")
+        logger.warning(f"GPU lock is currently held, user '{st.user.name}' must wait to process file '{tmp_filename}'")
+        st.stop()
+
     try:
         st.write("⏳ Analyse en cours... Prenez un café ☕")
 
@@ -192,6 +204,7 @@ def process_transcription(tmp_filename: str, type: str = "audio", language: str 
         logger.error(f"Error during transcription/diarization for file '{audio_file}': {str(e)}")
         st.error(f"❌ Erreur pendant la transcription/diarisation : {str(e)}")
     finally:
+        lock.release()
         os.remove(tmp_filename)
         if audio_file != tmp_filename:
             os.remove(audio_file)

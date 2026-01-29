@@ -9,8 +9,7 @@ from utils.style import custom_font
 from streamlit.runtime.secrets import secrets_singleton
 from utils.process import extract_audio_from_video, translate_srt_in_chunks
 from utils.api import transcribe_audio_via_api
-from typing import Any
-from utils.resource import load_whisper_model
+from utils.resource import load_whisper_model, get_gpu_lock, MAX_JOBS
 
 # Setup logger
 setup_logger()
@@ -34,6 +33,10 @@ st.button("🚪 Se déconnecter", on_click=st.logout)
 st.markdown(f"👋 Bonjour {st.user.name}, prêt à générer des sous-titres ?")
 
 st.title("Sous-titrage de vidéos")
+
+lock = get_gpu_lock()
+# st.write(f"Tâches disponibles : {lock._value} / {MAX_JOBS}")
+# st.write(f"ID du verrou actuel : {id(lock)}")
 
 WHISPER_LANGUAGES = {
     "Auto-détection": None,
@@ -103,6 +106,14 @@ if uploaded_video is not None:
             audio_path = video_path.rsplit(".", 1)[0] + ".wav"
             extract_audio_from_video(video_path, audio_path)
 
+            with st.spinner("⏳ En attente de disponibilité..."):
+                acquired = lock.acquire(blocking=True, timeout=300)
+
+            if not acquired:
+                st.warning("⚠️ Le système est actuellement très sollicité. Merci de réessayer dans quelques instants.")
+                logger.warning(f"GPU lock is currently held, user '{st.user.name}' must wait to process file '{tmp_filename}'")
+                st.stop()
+
             try:
                 logger.info(f"Starting subtitle generation for file '{video_path}'")
                 st.write("⏳ Analyse en cours... Prenez un café ☕")
@@ -117,6 +128,7 @@ if uploaded_video is not None:
                 st.error(f"❌ Une erreur est survenue : {e}")
 
             finally:
+                lock.release()
                 os.remove(video_path)
                 os.remove(audio_path)
 

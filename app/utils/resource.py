@@ -1,5 +1,8 @@
 import streamlit as st
 from typing import Any
+import threading
+
+MAX_JOBS = 1
 
 @st.cache_resource
 def load_whisper_model(model_name: str) -> Any:
@@ -21,3 +24,8 @@ def load_diarization_model() -> Any:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     pipeline.to(device)
     return pipeline
+
+@st.cache_resource
+def get_gpu_lock():
+    sem = threading.Semaphore(MAX_JOBS)
+    return sem
