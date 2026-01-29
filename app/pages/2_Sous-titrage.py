@@ -10,6 +10,7 @@ from streamlit.runtime.secrets import secrets_singleton
 from utils.process import extract_audio_from_video, translate_srt_in_chunks
 from utils.api import transcribe_audio_via_api
 from typing import Any
+from utils.resource import load_whisper_model
 
 # Setup logger
 setup_logger()
@@ -53,17 +54,6 @@ selected_language_name = st.selectbox(
     help="Sélectionnez une langue pour la transcription. L'auto-détection est utilisée par défaut."
 )
 st.session_state.selected_language_code_subtitling = WHISPER_LANGUAGES[selected_language_name]
-
-
-@st.cache_resource
-def load_whisper_model(model_name: str) -> Any:
-    import torch
-    import whisper
-
-    if st.secrets["app"].get("transcription_mode", "local") == "local":
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        return whisper.load_model(model_name, device=device)
-    return None
 
 
 model = load_whisper_model(st.secrets["app"].get("whisper_model", "turbo"))
