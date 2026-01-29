@@ -48,6 +48,7 @@ def convert_and_resample_audio(input_path: str, output_path: str, target_sr=1600
         "-i", input_path,
         "-ar", str(target_sr),
         "-ac", "1",
+        "-c:a", "pcm_s16le",
         output_path
     ]
     subprocess.run(cmd, check=True)
