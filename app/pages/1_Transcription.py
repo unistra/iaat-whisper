@@ -19,7 +19,7 @@ from utils.process import (
     summarize_text,
     assign_speakers,
 )
-from utils.resource import load_whisper_model, load_diarization_model, get_gpu_lock, MAX_JOBS, init_whisper_pool
+from utils.resource import get_whisper_model, load_diarization_model, get_gpu_lock
 
 # FIX Docker + m4a
 mimetypes.init()
@@ -88,7 +88,6 @@ selected_language_name = st.selectbox(
 )
 st.session_state.selected_language_code = WHISPER_LANGUAGES[selected_language_name]
 
-model_pool = init_whisper_pool(st.secrets["app"].get("whisper_model", "turbo"))
 diarization_model = load_diarization_model() if diarization_enabled else None
 
 
@@ -103,14 +102,8 @@ def transcribe_audio(file_path: str, language: str | None) -> dict:
             language=language,
         )
     else:
-        model_pool = init_whisper_pool(st.secrets["app"].get("whisper_model", "turbo"))
-        model = model_pool.get(block=False)
-        if model is not None:
-            result = model.transcribe(file_path, language=language)
-            model_pool.put(model)
-            return result
-        else:
-            raise ValueError("Transcription mode is 'local' but the model could not be loaded.")
+        with get_whisper_model() as model:
+            return model.transcribe(file_path, language=language)
 
 @st.cache_data
 def diarize_audio(file_path: str) -> Any:

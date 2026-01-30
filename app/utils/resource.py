@@ -2,6 +2,7 @@ import streamlit as st
 from typing import Any
 import threading
 import queue
+from contextlib import contextmanager
 
 # Maximum concurrent jobs
 MAX_JOBS = st.secrets["app"].get("max_concurrent_jobs", 3)
@@ -42,3 +43,30 @@ def load_diarization_model() -> Any:
 def get_gpu_lock():
     sem = threading.Semaphore(MAX_JOBS)
     return sem
+
+@contextmanager
+def get_whisper_model(timeout: int = 30):
+    """
+    Context manager to safely get and release a Whisper model from the pool.
+    
+    Args:
+        timeout: Maximum time to wait for a model (seconds)
+        
+    Yields:
+        The Whisper model
+        
+    Raises:
+        ValueError: If no model is available within timeout
+    """
+    model_name = st.secrets["app"].get("whisper_model", "turbo")
+    model_pool = init_whisper_pool(model_name)
+    
+    try:
+        model = model_pool.get(block=True, timeout=timeout)
+    except queue.Empty:
+        raise ValueError("All transcription models are currently busy. Please try again later.")
+    
+    try:
+        yield model
+    finally:
+        model_pool.put(model)
