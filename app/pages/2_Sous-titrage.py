@@ -195,11 +195,9 @@ if st.session_state.subtitle_result:
             language_target = st.selectbox(
                 "Choisissez la langue de traduction :", filter(lambda x: x != detected_language, ["", "fr", "en", "de", "it", "es"]), index=0,
                 format_func=lambda x: language_labels_fr[x] if x != "" else "",
-                disabled=st.session_state.disabled_translation,
-                on_change=on_click_translation
             )
 
-            if language_target != "" and language_target != detected_language:
+            if language_target != "" and language_target != detected_language and st.button("🌐 Traduire les sous-titres", disabled=st.session_state.disabled_translation, on_click=on_click_translation):
                 logger.info(f"User '{st.user.name}' is translating subtitles to '{language_target}'.")
                 translated_text = translate(
                     st.secrets["llm"]["url"],
