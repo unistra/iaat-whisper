@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.9] - 2026-01-30
+
+### Changed
+- Improved performance by implementing parallel job processing and limiting concurrent jobs.
+
+## [1.0.8] - 2026-01-29
+
+### Changed
+- Improved performance by loading models once.
+
+### Fixed
+- Fixed `pyannote` compatibility with WAV files by forcing `pcm_s16le`.
+
+## [1.0.7] - 2026-01-30
+
+### Added
+- Added video support for transcription.
+- Added support to force language selection.
+
+### Changed
+- Upgraded `streamlit` version.
+- Updated minor libraries.
+
+### Fixed
+- Added M4V MIME type support.
+
 ## [1.0.6] - 2025-11-19
 
 ### Added

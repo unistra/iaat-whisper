@@ -23,6 +23,7 @@ def test_get_secrets():
             "SUMY_LENGTH_DEFAULT": "80",
             "WHISPER_MODEL": "turbo",
             "TRANSCRIPTION_MODE": "api",
+            "MAX_CONCURRENT_JOBS": "3",
         },
     ):
         secrets = get_secrets()
@@ -43,3 +44,4 @@ def test_get_secrets():
         assert secrets["app"]["sumy_length_default"] == 80
         assert secrets["app"]["whisper_model"] == "turbo"
         assert secrets["app"]["transcription_mode"] == "api"
+        assert secrets["app"]["max_concurrent_jobs"] == 3

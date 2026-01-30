@@ -9,7 +9,7 @@ from utils.style import custom_font
 from streamlit.runtime.secrets import secrets_singleton
 from utils.process import extract_audio_from_video, translate_srt_in_chunks
 from utils.api import transcribe_audio_via_api
-from utils.resource import load_whisper_model, get_gpu_lock, MAX_JOBS
+from utils.resource import load_whisper_model, get_gpu_lock, MAX_JOBS, init_whisper_pool
 
 # Setup logger
 setup_logger()
@@ -59,7 +59,8 @@ selected_language_name = st.selectbox(
 st.session_state.selected_language_code_subtitling = WHISPER_LANGUAGES[selected_language_name]
 
 
-model = load_whisper_model(st.secrets["app"].get("whisper_model", "turbo"))
+model_pool = init_whisper_pool(st.secrets["app"].get("whisper_model", "turbo"))
+
 
 
 @st.cache_data
@@ -73,11 +74,14 @@ def transcribe_audio(file_path: str, language: str | None) -> dict:
             timestamp_granularities=["segment", "word"],
             language=language,
         )
-    elif model is not None:
-        return model.transcribe(file_path, language=language)
     else:
-        raise ValueError("Transcription mode is 'local' but the model could not be loaded.")
-
+        model = model_pool.get(block=False)
+        if model is not None:
+            result = model.transcribe(file_path, language=language)
+            model_pool.put(model)
+            return result
+        else:
+            raise ValueError("Transcription mode is 'local' but the model could not be loaded.")
 
 @st.cache_data
 def translate(base_url: str, authtoken: str, model: str, max_tokens, srt_text: str, language: str = "en") -> str:

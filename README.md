@@ -54,6 +54,7 @@ les traduire en plusieurs langues.
   sumy_length_default = 80
   whisper_model = "turbo"
   transcription_mode = "local" # ou "api"
+  max_concurrent_jobs = 3
   ```
 - Si vous souhaitez utiliser la police UnistraA (`use_custom_style = true`), vous devez télécharger les fichiers de police UnistraA (`UnistraA-Regular.ttf`, `UnistraA-Bold.ttf`, etc.) et les placer dans le dossier `app/static/fonts` du projet (ex: `app/static/fonts/UnistraA-Regular.ttf`).
 - Lancer les tests unitaires via:
@@ -87,6 +88,7 @@ les traduire en plusieurs langues.
     -e SUMY_LENGTH_DEFAULT="80" \
     -e WHISPER_MODEL="turbo"\
     -e TRANSCRIPTION_MODE="local" \
+    -e MAX_CONCURRENT_JOBS="3" \
     whisper-app
   ```
 

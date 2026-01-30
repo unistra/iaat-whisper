@@ -1,11 +1,13 @@
 import streamlit as st
 from typing import Any
 import threading
+import queue
 
-MAX_JOBS = 1
+# Maximum concurrent jobs
+MAX_JOBS = st.secrets["app"].get("max_concurrent_jobs", 3)
 
 @st.cache_resource
-def load_whisper_model(model_name: str) -> Any:
+def load_whisper_model(model_name: str, instance: int) -> Any:
     import torch
     import whisper
 
@@ -13,6 +15,17 @@ def load_whisper_model(model_name: str) -> Any:
         device = "cuda" if torch.cuda.is_available() else "cpu"
         return whisper.load_model(model_name, device=device)
     return None
+
+@st.cache_resource
+def init_whisper_pool(model_name: str) -> queue.Queue[Any]:
+    """
+    Initialize a pool of Whisper models for concurrent transcription
+    """
+    model_queue: queue.Queue[Any] = queue.Queue(maxsize=MAX_JOBS)
+    for i in range(MAX_JOBS):
+        model = load_whisper_model(model_name, i)
+        model_queue.put(model)
+    return model_queue
 
 @st.cache_resource
 def load_diarization_model() -> Any:
