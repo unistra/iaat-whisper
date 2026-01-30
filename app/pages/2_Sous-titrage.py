@@ -82,11 +82,24 @@ def translate(base_url: str, authtoken: str, model: str, max_tokens, srt_text: s
 if "subtitle_result" not in st.session_state:
     st.session_state.subtitle_result = None
 
+
+if "disabled_transcription" not in st.session_state:
+    st.session_state.disabled_transcription = False
+
+def on_click_transcription():
+    st.session_state.disabled_transcription = True
+
+if "disabled_translation" not in st.session_state:
+    st.session_state.disabled_translation = False
+
+def on_click_translation():
+    st.session_state.disabled_translation = True
+
 # Chargement du fichier vidéo
 uploaded_video = st.file_uploader("Déposez votre fichier vidéo ici", type=["m4v", "mp4", "mov", "avi"], help="Formats supportés : m4v, mp4, mov, avi")
 
 if uploaded_video is not None:
-    if st.button("📝 Générer les sous-titres"):
+    if st.button("📝 Générer les sous-titres", disabled=st.session_state.disabled_transcription, on_click=on_click_transcription):
         logger.info(f"User '{st.user.name}' uploaded file '{uploaded_video.name}' for subtitling.")
         file_extension = uploaded_video.name.split(".")[-1]
         mime_type, _ = mimetypes.guess_type(uploaded_video.name)
@@ -105,7 +118,7 @@ if uploaded_video is not None:
 
             if not acquired:
                 st.warning("⚠️ Le système est actuellement très sollicité. Merci de réessayer dans quelques instants.")
-                logger.warning(f"GPU lock is currently held, user '{st.user.name}' must wait to process file '{tmp_filename}'")
+                logger.warning(f"GPU lock is currently held, user '{st.user.name}' must wait to process file '{video_path}'")
                 st.stop()
 
             try:
@@ -125,6 +138,7 @@ if uploaded_video is not None:
                 lock.release()
                 os.remove(video_path)
                 os.remove(audio_path)
+                st.session_state.disabled_transcription = False
 
 # Affichage des résultats
 if st.session_state.subtitle_result:
@@ -180,7 +194,9 @@ if st.session_state.subtitle_result:
             }
             language_target = st.selectbox(
                 "Choisissez la langue de traduction :", filter(lambda x: x != detected_language, ["", "fr", "en", "de", "it", "es"]), index=0,
-                format_func=lambda x: language_labels_fr[x] if x != "" else ""
+                format_func=lambda x: language_labels_fr[x] if x != "" else "",
+                disabled=st.session_state.disabled_translation,
+                on_change=on_click_translation
             )
 
             if language_target != "" and language_target != detected_language:
@@ -215,3 +231,4 @@ if st.session_state.subtitle_result:
             os.remove(srt_path)
         if "vtt_path" in locals() and os.path.exists(vtt_path):
             os.remove(vtt_path)
+        st.session_state.disabled_translation = False

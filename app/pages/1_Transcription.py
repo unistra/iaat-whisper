@@ -155,6 +155,19 @@ if "previous_input_option" in st.session_state and st.session_state.previous_inp
 
 st.session_state.previous_input_option = input_option
 
+if "disabled_transcription" not in st.session_state:
+    st.session_state.disabled_transcription = False
+
+def on_click_transcription():
+    st.session_state.disabled_transcription = True
+    st.session_state.transcription_result = None
+    st.session_state.summary = None
+
+if "disabled_summarize" not in st.session_state:
+    st.session_state.disabled_summarize = False
+
+def on_click_summarize():
+    st.session_state.disabled_summarize = True
 
 def process_transcription(tmp_filename: str, type: str = "audio", language: str | None = None) -> None:
     """
@@ -207,6 +220,7 @@ def process_transcription(tmp_filename: str, type: str = "audio", language: str 
             os.remove(audio_file)
         if diarization_enabled and resampled_audio is not None:
             os.remove(resampled_audio)
+        st.session_state.disabled_transcription = False
 
 
 # File upload option
@@ -214,7 +228,7 @@ if input_option == "📂 Téléverser un fichier":
     uploaded_file = st.file_uploader("Déposez votre fichier audio ici", type=["mp3", "wav", "m4a", "m4v", "mp4", "mov", "avi"], help="Formats supportés : mp3, wav, m4a, m4v, mp4, mov, avi")
 
     if uploaded_file is not None:
-        if st.button("📝 Transformer l'audio en texte"):
+        if st.button("📝 Transformer l'audio en texte", disabled=st.session_state.disabled_transcription, on_click=on_click_transcription):
             file_extension = uploaded_file.name.split(".")[-1]
             mime_type, _ = mimetypes.guess_type(uploaded_file.name)
             if mime_type and (mime_type.startswith("audio") or  mime_type.startswith("video")):
@@ -245,10 +259,8 @@ elif input_option == "🎤 Utiliser le micro":
 
     # Add a button to start the transcription
     if "audio_data" in st.session_state and st.session_state.audio_data:
-        if st.button("📝 Transformer l'audio en texte"):
+        if st.button("📝 Transformer l'audio en texte", disabled=st.session_state.disabled_transcription, on_click=on_click_transcription):
             logger.info(f"User '{st.user.name}' is using microphone for transcription.")
-            st.session_state.transcription_result = None
-            st.session_state.summary = None
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
                 tmp_file.write(st.session_state.audio_data)
                 tmp_filename = tmp_file.name
@@ -331,7 +343,7 @@ if "transcription_result" in st.session_state and st.session_state.transcription
             help="Choisir un nombre plus élevé donnera une synthèse plus longue et plus détaillée.",
         )
 
-        if st.button("✨ Générer une synthèse"):
+        if st.button("✨ Générer une synthèse", disabled=st.session_state.disabled_summarize, on_click=on_click_summarize):
             logger.info(f"User '{st.user.name}' is generating a summary.")
             try:
                 st.write("⏳ Analyse en cours... Prenez un café ☕")
@@ -361,6 +373,8 @@ if "transcription_result" in st.session_state and st.session_state.transcription
             except Exception as e:
                 logger.error(f"Error during summarization: {str(e)}")
                 st.error(str(e))
+            finally:
+                st.session_state.disabled_summarize = False
 
         if st.session_state.summary:
             st.code(st.session_state.summary, language="plaintext", height=200, wrap_lines=True)

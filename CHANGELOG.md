@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Improved performance by implementing parallel job processing and limiting concurrent jobs.
+- Disabled buttons during long jobs
 
 ## [1.0.8] - 2026-01-29
 
